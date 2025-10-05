@@ -1,0 +1,386 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "PornMaster-Asian-pony-V1-VAE.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Checkpoint加载器（简易）"
+    }
+  },
+  "3": {
+    "inputs": {
+      "text": "(masterpiece,best quality,score_9, score_8_up, score_7_up:1),film grain,8K,Raw format,ultrahigh-res,She is sitting on a chair inside the cafe,backlighting,kpop idol,film photography photo of Korean idol,long hair,hair,(makeup,red lipstick,red lips),black eyes,air bangs,large breasts,grin,teeth,smile, looking at viewer and facing viewer,(completely nude,breasts,nipples,areolas,pubic hair,pussy),round earrings, blush,pussy close-up, sitting and spread legs,necklace,jewelry,indoors,She hides her hands behind her back,ass visible through thighs",
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      },
+      "clip": [
+        "42",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": "(score_6,score_5,score_4,score_3, score_2, score_1:1),source_furry,source_pony,source_cartoon,female child\n(blurry:1.4),(blurred foreground)\noverexposed background,poor lighting,overexposed areas,uneven lighting,Low resolution,potential compression artifact",
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      },
+      "clip": [
+        "42",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码"
+    }
+  },
+  "5": {
+    "inputs": {
+      "seed": 367225283643146,
+      "steps": 30,
+      "cfg": 7,
+      "sampler_name": "dpmpp_3m_sde",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "42",
+        0
+      ],
+      "positive": [
+        "3",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "latent_image": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "6": {
+    "inputs": {
+      "width": 800,
+      "height": 1200,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空Latent图像"
+    }
+  },
+  "7": {
+    "inputs": {
+      "samples": [
+        "5",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "9": {
+    "inputs": {
+      "lora_name": "asian beauty face-pony-v1.safetensors",
+      "strength_model": 0.30000000000000004,
+      "strength_clip": 0.30000000000000004,
+      "model": [
+        "1",
+        0
+      ],
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA"
+    }
+  },
+  "10": {
+    "inputs": {
+      "lora_name": "spo_sdxl_10ep_4k-data_lora_webui.safetensors",
+      "strength_model": 0.8000000000000002,
+      "strength_clip": 0.8000000000000002,
+      "model": [
+        "9",
+        0
+      ],
+      "clip": [
+        "9",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA"
+    }
+  },
+  "11": {
+    "inputs": {
+      "guide_size": 512,
+      "guide_size_for": true,
+      "max_size": 1024,
+      "seed": 392227651614158,
+      "steps": 20,
+      "cfg": 7,
+      "sampler_name": "dpmpp_3m_sde",
+      "scheduler": "karras",
+      "denoise": 0.5,
+      "feather": 5,
+      "noise_mask": true,
+      "force_inpaint": true,
+      "wildcard": "",
+      "cycle": 1,
+      "inpaint_model": false,
+      "noise_mask_feather": 20,
+      "tiled_encode": false,
+      "tiled_decode": false,
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      },
+      "image": [
+        "7",
+        0
+      ],
+      "segs": [
+        "32",
+        0
+      ],
+      "model": [
+        "1",
+        0
+      ],
+      "clip": [
+        "42",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "positive": [
+        "3",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ]
+    },
+    "class_type": "DetailerForEach",
+    "_meta": {
+      "title": "Detailer (SEGS)"
+    }
+  },
+  "17": {
+    "inputs": {
+      "threshold": 0.5,
+      "dilation": 4,
+      "bbox_detector": [
+        "27",
+        0
+      ],
+      "image": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "BboxDetectorCombined_v2",
+    "_meta": {
+      "title": "BBOX Detector (combined)"
+    }
+  },
+  "27": {
+    "inputs": {
+      "model_name": "bbox/face_yolov8m.pt"
+    },
+    "class_type": "UltralyticsDetectorProvider",
+    "_meta": {
+      "title": "UltralyticsDetectorProvider"
+    }
+  },
+  "32": {
+    "inputs": {
+      "combined": false,
+      "crop_factor": 3,
+      "bbox_fill": false,
+      "drop_size": 10,
+      "contour_fill": false,
+      "mask": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "MaskToSEGS",
+    "_meta": {
+      "title": "MASK to SEGS"
+    }
+  },
+  "35": {
+    "inputs": {
+      "rgthree_comparer": {
+        "images": [
+          {
+            "name": "A",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_kxcpn_07215_.png&type=temp&subfolder=&rand=0.20190277415911673"
+          },
+          {
+            "name": "B",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_kxcpn_07216_.png&type=temp&subfolder=&rand=0.44141699164493164"
+          }
+        ]
+      },
+      "image_a": [
+        "7",
+        0
+      ],
+      "image_b": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "Image Comparer (rgthree)",
+    "_meta": {
+      "title": "Image Comparer (rgthree)"
+    }
+  },
+  "37": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "保存图像"
+    }
+  },
+  "38": {
+    "inputs": {
+      "lora_name": "sdsFILM_v40-sdxl-V1.safetensors",
+      "strength_model": 0.8000000000000002,
+      "strength_clip": 0.8000000000000002,
+      "model": [
+        "10",
+        0
+      ],
+      "clip": [
+        "10",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA"
+    }
+  },
+  "39": {
+    "inputs": {
+      "lora_name": "Hand v2.safetensors",
+      "strength_model": 0.30000000000000004,
+      "strength_clip": 0.30000000000000004,
+      "model": [
+        "38",
+        0
+      ],
+      "clip": [
+        "38",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA"
+    }
+  },
+  "40": {
+    "inputs": {
+      "lora_name": "LabiaXXL.safetensors",
+      "strength_model": 0.30000000000000004,
+      "strength_clip": 0.30000000000000004,
+      "model": [
+        "39",
+        0
+      ],
+      "clip": [
+        "39",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA"
+    }
+  },
+  "41": {
+    "inputs": {
+      "lora_name": "ass.safetensors",
+      "strength_model": 0.30000000000000004,
+      "strength_clip": 0.30000000000000004,
+      "model": [
+        "40",
+        0
+      ],
+      "clip": [
+        "40",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA"
+    }
+  },
+  "42": {
+    "inputs": {
+      "lora_name": "pornmaster-realistic-Illustrious-V3.safetensors",
+      "strength_model": 0.25000000000000006,
+      "strength_clip": 0.25000000000000006,
+      "model": [
+        "41",
+        0
+      ],
+      "clip": [
+        "41",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "加载LoRA"
+    }
+  }
+}

@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI 图片生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 初始输入界面 */
+        .initial-input {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+            transition: all 0.5s ease;
+        }
+
+        .initial-input.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .initial-input::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+        }
+
+        .initial-input h1 {
+            color: white;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .initial-input .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .initial-input textarea {
+            width: 100%;
+            max-width: 500px;
+            padding: 24px;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            font-size: 16px;
+            resize: none;
+            min-height: 140px;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .initial-input textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .initial-input textarea:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.6);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+        }
+
+        .initial-input .submit-btn {
+            padding: 16px 56px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .initial-input .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .initial-input .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+        }
+
+        .initial-input .submit-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .initial-input .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 顶部栏 */
+        .top-bar {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            max-width: calc(100vw - 32px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .top-bar.show {
+            display: flex;
+            animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* 精简模式（默认显示） */
+        .top-bar-compact {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            min-height: 40px;
+        }
+
+        .top-bar-compact .counter {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .top-bar-compact .status-indicator {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+        }
+
+        .top-bar-compact .status-indicator.show {
+            display: flex;
+        }
+
+        .top-bar-compact .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+        }
+
+        .top-bar-compact .expand-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .top-bar-compact .expand-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .top-bar-compact .expand-btn.active {
+            transform: rotate(180deg);
+        }
+
+        /* 展开模式 */
+        .top-bar-expanded {
+            display: none;
+            padding: 0 16px 12px 16px;
+            gap: 8px;
+            flex-direction: column;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .top-bar-expanded.show {
+            display: flex;
+            animation: expandDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes expandDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 200px;
+            }
+        }
+
+        .top-bar-expanded .prompt-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 12px;
+        }
+
+        .top-bar-expanded .prompt-text {
+            flex: 1;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .top-bar-expanded .progress-badge {
+            background: rgba(99, 102, 241, 0.8);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .top-bar-expanded .button-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .top-bar-expanded .btn {
+            flex: 1;
+            padding: 8px 16px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .top-bar-expanded .stop-btn {
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+        }
+
+        .top-bar-expanded .stop-btn:hover {
+            background: rgba(239, 68, 68, 1);
+        }
+
+        .top-bar-expanded .continue-btn {
+            background: rgba(16, 185, 129, 0.8);
+            color: white;
+        }
+
+        .top-bar-expanded .continue-btn:hover {
+            background: rgba(16, 185, 129, 1);
+        }
+
+        .top-bar-expanded .edit-btn {
+            background: rgba(99, 102, 241, 0.8);
+            color: white;
+        }
+
+        .top-bar-expanded .edit-btn:hover {
+            background: rgba(99, 102, 241, 1);
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+            }
+            50% {
+                opacity: 0.4;
+                box-shadow: 0 0 4px rgba(16, 185, 129, 0.3);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .top-bar {
+                top: 10px;
+                max-width: calc(100vw - 20px);
+            }
+
+            .top-bar-compact {
+                padding: 8px 12px;
+                gap: 8px;
+            }
+
+            .top-bar-compact .counter {
+                font-size: 12px;
+            }
+
+            .top-bar-compact .status-indicator {
+                font-size: 10px;
+            }
+
+            .top-bar-expanded {
+                padding: 0 12px 10px 12px;
+            }
+
+            .top-bar-expanded .prompt-text {
+                font-size: 11px;
+            }
+
+            .top-bar-expanded .btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+        }
+
+        /* 主图片显示区域 */
+        .main-viewer {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 70px 20px 60px; /* 顶部留空给UI元素，底部留空给切换按钮 */
+        }
+
+        @media (max-width: 480px) {
+            .image-container {
+                padding: 60px 10px 50px; /* 移动端减少padding */
+            }
+        }
+
+        .current-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .current-image.slide-up {
+            animation: slideUp 0.3s ease;
+        }
+
+        .current-image.slide-down {
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 等待状态 */
+        .waiting-state {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 1;
+        }
+
+        .waiting-state .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .waiting-state p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+
+        /* 下滑提示 */
+        .swipe-hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 24px;
+            border-radius: 30px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .swipe-hint.show {
+            opacity: 1;
+            pointer-events: auto;
+            animation: bounce 2s ease-in-out 3;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-8px); }
+        }
+
+        .swipe-hint:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .swipe-hint .arrow {
+            font-size: 20px;
+        }
+
+        /* 无更多图片提示 */
+        .no-more-hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 10px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        .no-more-hint.show {
+            display: block;
+        }
+
+        /* 加载更多提示 */
+        .loading-more {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(99, 102, 241, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            display: none;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .loading-more.show {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .loading-more::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* 底部图片列表 */
+        .image-gallery {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(calc(100% - 0px));
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 200;
+            max-height: 180px;
+            overflow: hidden;
+            padding-top: 0;
+        }
+
+        .image-gallery.open {
+            transform: translateY(0);
+        }
+
+        .gallery-toggle {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 201;
+        }
+
+        .gallery-toggle.show {
+            display: flex;
+        }
+
+        .gallery-toggle:hover {
+            background: rgba(0, 0, 0, 1);
+        }
+
+        .gallery-toggle .arrow {
+            font-size: 20px;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-toggle.active .arrow {
+            transform: rotate(180deg);
+        }
+
+        .gallery-scroll {
+            display: flex;
+            gap: 12px;
+            padding: 20px 16px 16px 16px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            height: 180px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .gallery-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .gallery-thumb {
+            min-width: 100px;
+            width: 100px;
+            height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+
+        .gallery-thumb:hover {
+            transform: scale(1.05);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .gallery-thumb.active {
+            border-color: rgba(99, 102, 241, 1);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-thumb .thumb-index {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 初始输入界面 -->
+    <div id="initialInput" class="initial-input">
+        <h1>✨ AI 图片生成</h1>
+        <p class="subtitle">描述你的想象，让 AI 为你创作</p>
+        <textarea id="promptInput" placeholder="例如：一只可爱的猫咪在星空下..."></textarea>
+        <button id="submitBtn" class="submit-btn">开始创作 →</button>
+    </div>
+
+    <!-- 顶部栏 -->
+    <div id="topBar" class="top-bar">
+        <!-- 精简模式 -->
+        <div class="top-bar-compact">
+            <span class="counter" id="imageCounter">1/1</span>
+            <div class="status-indicator" id="statusIndicator">
+                <div class="status-dot"></div>
+                <span id="statusText">生成中</span>
+            </div>
+            <button class="expand-btn" id="expandBtn">▼</button>
+        </div>
+
+        <!-- 展开模式 -->
+        <div class="top-bar-expanded" id="topBarExpanded">
+            <div class="prompt-row">
+                <span class="prompt-text" id="taskPrompt"></span>
+                <span class="progress-badge" id="taskProgress">0/∞</span>
+            </div>
+            <div class="button-row">
+                <button id="stopBtn" class="btn stop-btn" style="display: none;">⏸ 停止</button>
+                <button id="continueBtn" class="btn continue-btn" style="display: none;">▶ 继续</button>
+                <button id="editBtn" class="btn edit-btn">✏ 换词</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主图片显示区域 -->
+    <div id="mainViewer" class="main-viewer">
+        <div class="image-container" id="imageContainer">
+            <img id="currentImage" class="current-image" style="display: none;">
+            <div id="waitingState" class="waiting-state">
+                <div class="spinner"></div>
+                <p id="waitingText">正在生成图片...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 下滑提示 -->
+    <div id="swipeHint" class="swipe-hint" style="display: none;">
+        <span>下滑查看更多</span>
+        <span class="arrow">↓</span>
+    </div>
+
+    <!-- 无更多图片提示 -->
+    <div id="noMoreHint" class="no-more-hint">正在生成更多图片...</div>
+
+    <!-- 加载更多提示 -->
+    <div id="loadingMore" class="loading-more">正在生成更多图片...</div>
+
+    <!-- 底部图片列表切换按钮 -->
+    <div class="gallery-toggle" id="galleryToggle">
+        <span class="arrow">↑</span>
+    </div>
+
+    <!-- 底部图片列表 -->
+    <div id="imageGallery" class="image-gallery">
+        <div class="gallery-scroll" id="galleryScroll"></div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+
+        // DOM元素
+        const initialInput = document.getElementById('initialInput');
+        const promptInput = document.getElementById('promptInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const topBar = document.getElementById('topBar');
+        const topBarExpanded = document.getElementById('topBarExpanded');
+        const expandBtn = document.getElementById('expandBtn');
+        const taskPrompt = document.getElementById('taskPrompt');
+        const taskProgress = document.getElementById('taskProgress');
+        const mainViewer = document.getElementById('mainViewer');
+        const imageContainer = document.getElementById('imageContainer');
+        const currentImage = document.getElementById('currentImage');
+        const waitingState = document.getElementById('waitingState');
+        const imageCounter = document.getElementById('imageCounter');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const swipeHint = document.getElementById('swipeHint');
+        const noMoreHint = document.getElementById('noMoreHint');
+        const loadingMore = document.getElementById('loadingMore');
+        const stopBtn = document.getElementById('stopBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const editBtn = document.getElementById('editBtn');
+        const waitingText = document.getElementById('waitingText');
+        const imageGallery = document.getElementById('imageGallery');
+        const galleryToggle = document.getElementById('galleryToggle');
+        const galleryScroll = document.getElementById('galleryScroll');
+
+        // 状态变量
+        let images = [];
+        let currentIndex = 0;
+        let currentPrompt = '';
+        let isGenerating = false;
+        let autoTriggerEnabled = true;
+        let statusPollingInterval = null;
+        let touchStartY = 0;
+        let touchEndY = 0;
+        let lastSwipeDirection = ''; // 'up' or 'down'
+        let swipeHintDismissed = false; // 用户是否已关闭下滑提示
+        let isTopBarExpanded = false; // 顶部栏展开状态
+
+        // 展开/收起顶部栏
+        expandBtn.addEventListener('click', () => {
+            isTopBarExpanded = !isTopBarExpanded;
+            if (isTopBarExpanded) {
+                topBarExpanded.classList.add('show');
+                expandBtn.classList.add('active');
+            } else {
+                topBarExpanded.classList.remove('show');
+                expandBtn.classList.remove('active');
+            }
+        });
+
+        // 提交按钮
+        submitBtn.addEventListener('click', async () => {
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                alert('请输入图片描述');
+                return;
+            }
+
+            // 检查是否是新提示词
+            const isNewPrompt = prompt !== currentPrompt;
+
+            // 只有新提示词才清空图片
+            if (isNewPrompt) {
+                images = [];
+                currentIndex = 0;
+                currentPrompt = prompt;
+                swipeHintDismissed = false; // 重置提示状态
+                autoTriggerEnabled = true; // 重置自动触发
+                galleryScroll.innerHTML = ''; // 清空缩略图
+            }
+
+            // 动画隐藏初始输入界面
+            initialInput.classList.add('hidden');
+
+            // 显示顶部栏
+            setTimeout(() => {
+                topBar.classList.add('show');
+                taskPrompt.textContent = prompt;
+                if (isNewPrompt) {
+                    taskProgress.textContent = '0/∞';
+                }
+            }, 300);
+
+            // 新提示词时显示等待状态
+            if (isNewPrompt) {
+                currentImage.style.display = 'none';
+                waitingState.style.display = 'block';
+            }
+
+            // 开始生成（无限模式，不设置count）
+            const response = await fetch('/api/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, count: 999999 })
+            });
+
+            if (response.ok) {
+                startPolling();
+            }
+        });
+
+        // 轮询状态
+        async function startPolling() {
+            if (statusPollingInterval) clearInterval(statusPollingInterval);
+            statusPollingInterval = setInterval(pollStatus, 500);
+        }
+
+        async function pollStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const status = await response.json();
+
+                isGenerating = status.is_running;
+
+                // 更新进度（无限模式）
+                taskProgress.textContent = `${status.generated_count}/∞`;
+
+                // 更新停止/继续按钮和状态指示器
+                if (isGenerating) {
+                    stopBtn.style.display = 'flex';
+                    continueBtn.style.display = 'none';
+                    statusIndicator.classList.add('show');
+                    statusText.textContent = `生成中`;
+                    loadingMore.classList.remove('show');
+                } else {
+                    stopBtn.style.display = 'none';
+                    continueBtn.style.display = currentPrompt ? 'flex' : 'none';
+                    statusIndicator.classList.remove('show');
+                }
+
+                // 检查新图片
+                if (status.images && status.images.length > images.length) {
+                    const hadNoImages = images.length === 0;
+                    const newImages = status.images.slice(images.length);
+                    newImages.forEach((filename, idx) => {
+                        const imageIndex = images.length;
+                        images.push(filename);
+                        addThumbnail(filename, imageIndex);
+                    });
+
+                    // 如果之前没有图片，现在有了，显示第一张
+                    if (hadNoImages && images.length > 0) {
+                        showImage(0);
+                    }
+
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('轮询错误:', error);
+            }
+        }
+
+        // 添加缩略图到列表
+        function addThumbnail(filename, index) {
+            const thumb = document.createElement('div');
+            thumb.className = 'gallery-thumb';
+            thumb.dataset.index = index;
+
+            thumb.innerHTML = `
+                <img src="/static/generated/${filename}" alt="图片 ${index + 1}">
+                <div class="thumb-index">${index + 1}</div>
+            `;
+
+            thumb.addEventListener('click', () => {
+                showImage(index);
+            });
+
+            galleryScroll.appendChild(thumb);
+        }
+
+        // 更新缩略图激活状态
+        function updateThumbnailActive() {
+            const thumbs = galleryScroll.querySelectorAll('.gallery-thumb');
+            thumbs.forEach((thumb, idx) => {
+                if (idx === currentIndex) {
+                    thumb.classList.add('active');
+                    // 滚动到当前缩略图
+                    thumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                } else {
+                    thumb.classList.remove('active');
+                }
+            });
+        }
+
+        // 显示图片
+        function showImage(index, direction = '') {
+            if (index < 0 || index >= images.length) return;
+
+            currentIndex = index;
+
+            // 添加切换动画
+            if (direction) {
+                currentImage.classList.remove('slide-up', 'slide-down');
+                void currentImage.offsetWidth; // 触发重绘
+                currentImage.classList.add(direction === 'up' ? 'slide-up' : 'slide-down');
+            }
+
+            currentImage.src = `/static/generated/${images[index]}?t=${Date.now()}`;
+            currentImage.style.display = 'block';
+            waitingState.style.display = 'none';
+
+            updateUI();
+        }
+
+        // 更新UI状态
+        function updateUI() {
+            // 更新计数器
+            if (images.length > 0) {
+                imageCounter.textContent = `${currentIndex + 1}/${images.length}`;
+            }
+
+            // 更新缩略图激活状态
+            updateThumbnailActive();
+
+            // 显示/隐藏图片列表切换按钮
+            if (images.length > 0) {
+                galleryToggle.classList.add('show');
+            } else {
+                galleryToggle.classList.remove('show');
+            }
+
+            // 显示下滑提示（只在第一次有多张图片时显示，且用户未关闭）
+            if (!swipeHintDismissed && images.length > 1 && currentIndex === 0) {
+                swipeHint.classList.add('show');
+                // 6秒后自动隐藏（3次bounce动画）
+                setTimeout(() => {
+                    swipeHint.classList.remove('show');
+                }, 6000);
+            } else {
+                swipeHint.classList.remove('show');
+            }
+        }
+
+        // 添加更多图片
+        async function addMoreImages(count) {
+            console.log('请求更多图片:', count);
+            loadingMore.classList.add('show');
+
+            const response = await fetch('/api/add_more', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ count })
+            });
+
+            if (response.ok) {
+                startPolling();
+            }
+        }
+
+        // 触摸事件处理
+        mainViewer.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        mainViewer.addEventListener('touchend', (e) => {
+            touchEndY = e.changedTouches[0].clientY;
+            handleSwipe();
+        });
+
+        // 处理滑动
+        function handleSwipe() {
+            const deltaY = touchStartY - touchEndY;
+
+            // 下滑 (向下滑动，deltaY为负)
+            if (deltaY < -50) {
+                // 上一张
+                if (currentIndex > 0) {
+                    showImage(currentIndex - 1, 'down');
+                }
+            }
+            // 上滑 (向上滑动，deltaY为正)
+            else if (deltaY > 50) {
+                // 下一张
+                if (currentIndex < images.length - 1) {
+                    showImage(currentIndex + 1, 'up');
+                } else {
+                    // 已经是最后一张，显示提示
+                    if (images.length > 0) {
+                        if (isGenerating) {
+                            noMoreHint.textContent = '正在生成更多图片...';
+                        } else {
+                            noMoreHint.textContent = '已经是最后一张了';
+                        }
+                        noMoreHint.classList.add('show');
+                        setTimeout(() => {
+                            noMoreHint.classList.remove('show');
+                        }, 2000);
+                    }
+                }
+            }
+        }
+
+        // 页面加载时检查状态
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/api/status');
+                const status = await response.json();
+
+                console.log('加载状态:', status);
+
+                // 判断是否有活动任务或历史数据
+                const hasActiveTask = status.is_running || status.current_prompt;
+                const hasImages = status.images && status.images.length > 0;
+
+                if (hasActiveTask || hasImages) {
+                    // 恢复状态
+                    images = status.images || [];
+                    currentPrompt = status.current_prompt || '';
+                    autoTriggerEnabled = !status.is_running;
+                    isGenerating = status.is_running;
+
+                    // 隐藏初始输入
+                    initialInput.classList.add('hidden');
+
+                    // 显示顶部栏
+                    topBar.classList.add('show');
+                    taskPrompt.textContent = currentPrompt;
+                    taskProgress.textContent = `${status.generated_count}/∞`;
+
+                    // 恢复缩略图列表
+                    galleryScroll.innerHTML = '';
+                    images.forEach((filename, index) => {
+                        addThumbnail(filename, index);
+                    });
+
+                    // 如果有图片，显示第一张
+                    if (hasImages) {
+                        showImage(0);
+                        waitingState.style.display = 'none';
+                    } else {
+                        // 没有图片，显示等待状态
+                        currentImage.style.display = 'none';
+                        waitingState.style.display = 'block';
+                    }
+
+                    // 如果正在生成，开始轮询
+                    if (status.is_running) {
+                        startPolling();
+                    }
+
+                    console.log('✅ 状态已恢复 - 正在运行:', status.is_running, '图片数量:', images.length);
+                } else {
+                    console.log('📝 无历史数据，显示初始输入界面');
+                }
+            } catch (error) {
+                console.error('加载状态失败:', error);
+            }
+        });
+
+        // 停止按钮
+        stopBtn.addEventListener('click', async () => {
+            const response = await fetch('/api/stop', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                isGenerating = false;
+                stopBtn.style.display = 'none';
+                continueBtn.style.display = 'flex';
+                loadingMore.classList.remove('show');
+                statusIndicator.classList.remove('show');
+
+                if (statusPollingInterval) {
+                    clearInterval(statusPollingInterval);
+                    statusPollingInterval = null;
+                }
+            }
+        });
+
+        // 继续生成按钮
+        continueBtn.addEventListener('click', async () => {
+            if (!currentPrompt) return;
+
+            const response = await fetch('/api/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: currentPrompt, count: 999999 })
+            });
+
+            if (response.ok) {
+                continueBtn.style.display = 'none';
+                stopBtn.style.display = 'flex';
+                startPolling();
+            }
+        });
+
+        // 修改提示词按钮
+        editBtn.addEventListener('click', () => {
+            // 确认是否要修改（会清空当前图片）
+            if (images.length > 0) {
+                if (!confirm('修改提示词将清空当前图片，是否继续？')) {
+                    return;
+                }
+            }
+
+            // 显示输入界面
+            initialInput.classList.remove('hidden');
+            promptInput.value = currentPrompt;
+            promptInput.focus();
+        });
+
+        // 点击下滑提示关闭
+        swipeHint.addEventListener('click', () => {
+            swipeHintDismissed = true;
+            swipeHint.classList.remove('show');
+        });
+
+        // 图片列表切换
+        galleryToggle.addEventListener('click', () => {
+            imageGallery.classList.toggle('open');
+            galleryToggle.classList.toggle('active');
+        });
+
+        // Socket进度更新
+        socket.on('progress', (data) => {
+            console.log('收到进度更新:', data);
+
+            // 根据状态更新等待文字
+            if (data.status === 'generating_prompt') {
+                waitingText.textContent = '正在生成提示词...';
+            } else if (data.status === 'generating_image') {
+                waitingText.textContent = '正在生成图片...';
+            } else {
+                waitingText.textContent = '正在生成图片...';
+            }
+        });
+
+        // Socket错误处理
+        socket.on('error', (data) => {
+            console.error('错误:', data);
+            alert('错误: ' + data.message);
+        });
+    </script>
+</body>
+</html>

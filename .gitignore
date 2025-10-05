@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+app.log
+
+# Generated files
+static/generated/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+*.cover
+.hypothesis/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+temp/
+tmp/
+
+# Node (if any frontend build tools are used)
+node_modules/
+package-lock.json
+yarn.lock
+
+# ComfyUI specific
+output/
+temp/
+models/
+custom_nodes/
+web/extensions/
+
+# System files
+Thumbs.db
+desktop.ini

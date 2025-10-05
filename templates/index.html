@@ -154,14 +154,14 @@
         /* 顶部栏 */
         .top-bar {
             position: fixed;
-            top: 16px;
+            top: 8px;  /* 更贴近顶部 */
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
+            border-radius: 20px;  /* 稍微减小圆角 */
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             z-index: 100;
             display: none;
@@ -191,14 +191,14 @@
         .top-bar-compact {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            min-height: 40px;
+            gap: 10px;
+            padding: 8px 14px;  /* 减小padding */
+            min-height: 36px;   /* 减小最小高度 */
         }
 
         .top-bar-compact .counter {
             color: white;
-            font-size: 14px;
+            font-size: 13px;  /* 稍微减小字体 */
             font-weight: 600;
             letter-spacing: 0.5px;
         }
@@ -206,9 +206,9 @@
         .top-bar-compact .status-indicator {
             display: none;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
+            font-size: 11px;  /* 稍微减小字体 */
         }
 
         .top-bar-compact .status-indicator.show {
@@ -252,8 +252,8 @@
         /* 展开模式 */
         .top-bar-expanded {
             display: none;
-            padding: 0 16px 12px 16px;
-            gap: 8px;
+            padding: 0 14px 10px 14px;  /* 减小padding */
+            gap: 6px;  /* 减小间距 */
             flex-direction: column;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -270,7 +270,7 @@
             }
             to {
                 opacity: 1;
-                max-height: 200px;
+                max-height: 150px;  /* 减小最大高度 */
             }
         }
 
@@ -278,13 +278,13 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding-top: 12px;
+            padding-top: 10px;  /* 减小顶部padding */
         }
 
         .top-bar-expanded .prompt-text {
             flex: 1;
             color: rgba(255, 255, 255, 0.9);
-            font-size: 13px;
+            font-size: 12px;  /* 稍微减小字体 */
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -293,23 +293,23 @@
         .top-bar-expanded .progress-badge {
             background: rgba(99, 102, 241, 0.8);
             color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
+            padding: 3px 8px;  /* 减小padding */
+            border-radius: 10px;  /* 稍微减小圆角 */
+            font-size: 10px;  /* 减小字体 */
             font-weight: 600;
             white-space: nowrap;
         }
 
         .top-bar-expanded .button-row {
             display: flex;
-            gap: 8px;
+            gap: 6px;  /* 减小间距 */
         }
 
         .top-bar-expanded .btn {
             flex: 1;
-            padding: 8px 16px;
-            border-radius: 14px;
-            font-size: 12px;
+            padding: 6px 12px;  /* 减小padding */
+            border-radius: 12px;  /* 稍微减小圆角 */
+            font-size: 11px;  /* 减小字体 */
             font-weight: 500;
             cursor: pointer;
             border: none;
@@ -317,7 +317,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 3px;  /* 减小图标间距 */
         }
 
         .top-bar-expanded .stop-btn {
@@ -360,17 +360,18 @@
 
         @media (max-width: 480px) {
             .top-bar {
-                top: 10px;
+                top: 5px;  /* 移动端更贴近顶部 */
                 max-width: calc(100vw - 20px);
             }
 
             .top-bar-compact {
-                padding: 8px 12px;
+                padding: 6px 10px;  /* 进一步减小padding */
                 gap: 8px;
+                min-height: 32px;  /* 减小最小高度 */
             }
 
             .top-bar-compact .counter {
-                font-size: 12px;
+                font-size: 11px;  /* 减小字体 */
             }
 
             .top-bar-compact .status-indicator {
@@ -378,16 +379,21 @@
             }
 
             .top-bar-expanded {
-                padding: 0 12px 10px 12px;
+                padding: 0 10px 8px 10px;  /* 减小padding */
             }
 
             .top-bar-expanded .prompt-text {
-                font-size: 11px;
+                font-size: 10px;  /* 减小字体 */
+            }
+
+            .top-bar-expanded .progress-badge {
+                font-size: 9px;  /* 减小字体 */
+                padding: 2px 6px;
             }
 
             .top-bar-expanded .btn {
-                padding: 6px 12px;
-                font-size: 11px;
+                padding: 5px 10px;  /* 减小padding */
+                font-size: 10px;  /* 减小字体 */
             }
         }
 
@@ -409,12 +415,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 70px 20px 60px; /* 顶部留空给UI元素，底部留空给切换按钮 */
+            padding: 50px 10px 30px; /* 大幅减少padding，让图片利用更多空间 */
         }
 
         @media (max-width: 480px) {
             .image-container {
-                padding: 60px 10px 50px; /* 移动端减少padding */
+                padding: 45px 5px 25px; /* 移动端进一步减少padding */
             }
         }
 
@@ -458,7 +464,7 @@
         /* 等待状态 */
         .waiting-state {
             position: absolute;
-            top: 50%;
+            top: 45%;  /* 稍微上移，考虑到顶部空间减少 */
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;

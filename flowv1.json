@@ -54,9 +54,9 @@
   },
   "5": {
     "inputs": {
-      "seed": 503303440470893,
-      "steps": 30,
-      "cfg": 7,
+      "seed": 210045484395440,
+      "steps": 40,
+      "cfg": 3,
       "sampler_name": "dpmpp_3m_sde",
       "scheduler": "karras",
       "denoise": 1,
@@ -84,8 +84,8 @@
   },
   "6": {
     "inputs": {
-      "width": 800,
-      "height": 1200,
+      "width": 896,
+      "height": 1152,
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
@@ -112,8 +112,8 @@
   "9": {
     "inputs": {
       "lora_name": "asian beauty face-pony-v1.safetensors",
-      "strength_model": 0.9000000000000001,
-      "strength_clip": 0.9000000000000001,
+      "strength_model": 0.5000000000000001,
+      "strength_clip": 0.5000000000000001,
       "model": [
         "1",
         0
@@ -131,8 +131,8 @@
   "10": {
     "inputs": {
       "lora_name": "spo_sdxl_10ep_4k-data_lora_webui.safetensors",
-      "strength_model": 0.30000000000000004,
-      "strength_clip": 0.30000000000000004,
+      "strength_model": 0.8000000000000002,
+      "strength_clip": 0.8500000000000002,
       "model": [
         "1",
         0
@@ -152,10 +152,10 @@
       "guide_size": 512,
       "guide_size_for": true,
       "max_size": 1024,
-      "seed": 260289567622825,
+      "seed": 824725776859281,
       "steps": 20,
       "cfg": 7,
-      "sampler_name": "dpmpp_3m_sde",
+      "sampler_name": "euler",
       "scheduler": "karras",
       "denoise": 0.5,
       "feather": 5,
@@ -258,12 +258,12 @@
           {
             "name": "A",
             "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_ikleu_00289_.png&type=temp&subfolder=&rand=0.6320756564697664"
+            "url": "/api/view?filename=rgthree.compare._temp_ganrm_00127_.png&type=temp&subfolder=&rand=0.3291913290677634"
           },
           {
             "name": "B",
             "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_ikleu_00290_.png&type=temp&subfolder=&rand=0.9562420165992094"
+            "url": "/api/view?filename=rgthree.compare._temp_ganrm_00128_.png&type=temp&subfolder=&rand=0.09308787082626979"
           }
         ]
       },
@@ -297,8 +297,8 @@
   "38": {
     "inputs": {
       "lora_name": "sdsFILM_v40-sdxl-V1.safetensors",
-      "strength_model": 0.30000000000000004,
-      "strength_clip": 0.30000000000000004,
+      "strength_model": 0.8500000000000002,
+      "strength_clip": 0.8500000000000002,
       "model": [
         "10",
         0
@@ -316,8 +316,8 @@
   "39": {
     "inputs": {
       "lora_name": "Hand v2.safetensors",
-      "strength_model": 0.30000000000000004,
-      "strength_clip": 0.30000000000000004,
+      "strength_model": 1.0000000000000002,
+      "strength_clip": 1.0000000000000002,
       "model": [
         "38",
         0
@@ -335,33 +335,14 @@
   "40": {
     "inputs": {
       "lora_name": "LabiaXXL.safetensors",
-      "strength_model": 0.30000000000000004,
-      "strength_clip": 0.30000000000000004,
+      "strength_model": 0.5000000000000001,
+      "strength_clip": 0.5000000000000001,
       "model": [
         "39",
         0
       ],
       "clip": [
         "39",
-        1
-      ]
-    },
-    "class_type": "LoraLoader",
-    "_meta": {
-      "title": "加载LoRA"
-    }
-  },
-  "41": {
-    "inputs": {
-      "lora_name": "ass.safetensors",
-      "strength_model": 0.30000000000000004,
-      "strength_clip": 0.30000000000000004,
-      "model": [
-        "40",
-        0
-      ],
-      "clip": [
-        "40",
         1
       ]
     },
@@ -376,11 +357,11 @@
       "strength_model": 0.10000000000000002,
       "strength_clip": 0.10000000000000002,
       "model": [
-        "41",
+        "40",
         0
       ],
       "clip": [
-        "41",
+        "40",
         1
       ]
     },
@@ -391,7 +372,7 @@
   },
   "45": {
     "inputs": {
-      "value": "(masterpiece,best quality,score_9,score_8_up:1.2),RAW photo,classroom setting,blackboard,desks,25-year-old Korean female teacher,pale skin,delicate facial features,large black eyes,double eyelids,high nose bridge,small cherry lips,pointed chin,long black hair,lingerie,fishnet stockings,high heels,standing pose,visible legs,9-head body proportions,slender legs,detailed labia close-up,facial jewelry,sparkling accessories,earrings,necklace,makeup,red lipstick,blush,looking at viewer,professional lighting,sharp focus",
+      "value": "score_8_up, 8k resolution, ultra high definition, masterpiece, best quality, highly detailed, A female teacher masturbating in a classroom while wearing office lady attire, sitting with M-shaped legs lifting her hips, hands on thighs spreading legs to reveal pussy to viewer, wearing stockings with bare feet, curly long hair, large breasts, nine-head body proportion, delicate accessories, blushing face after being discovered, detailed face with defined nose, arched eyebrows, almond-shaped eyes, rosy cheeks, parted lips, detailed hands, detailed edges, DSLR photography, depth_of_field, natural lighting, classroom environment with desks and blackboard",
       "speak_and_recognation": {
         "__value__": [
           false,
@@ -406,7 +387,7 @@
   },
   "46": {
     "inputs": {
-      "value": "worst quality,low quality,blurry,lowres,female child,dark-skinned female,illustration,3d,2d,painting,cartoons,sketch,text,watermark,signature,username,underwear,normal clothes,full body shot from far,blurred foreground,overexposed",
+      "value": "score_1, score_2, score_3, low quality, worst quality, blurry, out of focus, bad anatomy, deformed, mutated, extra limbs, missing limbs, bad hands, bad feet, text, signature, username, watermark, illustration, 3d, 2d, painting, cartoons, sketch, female child, dark-skinned female, overexposed, underexposed   ",
       "speak_and_recognation": {
         "__value__": [
           false,
@@ -432,7 +413,7 @@
         ]
       },
       "clip": [
-        "1",
+        "9",
         1
       ]
     },
@@ -454,7 +435,7 @@
         ]
       },
       "clip": [
-        "1",
+        "9",
         1
       ]
     },

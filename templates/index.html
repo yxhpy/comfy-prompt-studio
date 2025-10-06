@@ -497,6 +497,15 @@
             background: rgba(99, 102, 241, 1);
         }
 
+        .top-bar-expanded .history-btn {
+            background: rgba(168, 85, 247, 0.8);
+            color: white;
+        }
+
+        .top-bar-expanded .history-btn:hover {
+            background: rgba(168, 85, 247, 1);
+        }
+
         /* 日志显示区域 */
         .log-container {
             margin-top: 10px;
@@ -537,6 +546,120 @@
 
         .log-container::-webkit-scrollbar-thumb:hover {
             background: rgba(99, 102, 241, 0.7);
+        }
+
+        /* 历史记录面板 */
+        .history-panel {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background: rgba(26, 26, 46, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 200;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-panel.show {
+            right: 0;
+        }
+
+        .history-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-header h3 {
+            color: white;
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .history-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }
+
+        .history-close:hover {
+            color: white;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .history-item.active {
+            background: rgba(99, 102, 241, 0.3);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+        }
+
+        .history-item-prompt {
+            color: white;
+            font-size: 13px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .history-item-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .history-item-count {
+            color: rgba(99, 102, 241, 0.8);
+        }
+
+        .history-item-delete {
+            background: rgba(239, 68, 68, 0.8);
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .history-item-delete:hover {
+            background: rgba(239, 68, 68, 1);
         }
 
         @keyframes blink {
@@ -1033,6 +1156,7 @@
                 <button id="stopBtn" class="btn stop-btn" style="display: none;">⏸ 停止</button>
                 <button id="continueBtn" class="btn continue-btn" style="display: none;">▶ 继续</button>
                 <button id="editBtn" class="btn edit-btn">✏ 换词</button>
+                <button id="historyBtn" class="btn history-btn">📝 历史</button>
             </div>
             <!-- 日志显示区域 -->
             <div class="log-container" id="logContainer">
@@ -1077,6 +1201,17 @@
         <span class="arrow">↑</span>
     </div>
 
+    <!-- 历史记录面板 -->
+    <div id="historyPanel" class="history-panel">
+        <div class="history-header">
+            <h3>历史记录</h3>
+            <button class="history-close" id="historyClose">✕</button>
+        </div>
+        <div class="history-list" id="historyList">
+            <!-- 历史记录将动态加载 -->
+        </div>
+    </div>
+
     <!-- 底部图片列表 -->
     <div id="imageGallery" class="image-gallery">
         <div class="gallery-scroll" id="galleryScroll"></div>
@@ -1109,6 +1244,10 @@
         const stopBtn = document.getElementById('stopBtn');
         const continueBtn = document.getElementById('continueBtn');
         const editBtn = document.getElementById('editBtn');
+        const historyBtn = document.getElementById('historyBtn');
+        const historyPanel = document.getElementById('historyPanel');
+        const historyClose = document.getElementById('historyClose');
+        const historyList = document.getElementById('historyList');
         const logContainer = document.getElementById('logContainer');
         const logContent = document.getElementById('logContent');
         const waitingText = document.getElementById('waitingText');
@@ -1139,6 +1278,8 @@
         let lastSwipeDirection = ''; // 'up' or 'down'
         let swipeHintDismissed = false; // 用户是否已关闭下滑提示
         let isTopBarExpanded = false; // 顶部栏展开状态
+        let currentPromptId = null; // 当前提示词ID
+        let historyRecords = []; // 历史记录列表
 
         // 初始化显示屏幕尺寸
         function updateScreenSizeDisplay() {
@@ -1654,6 +1795,144 @@
                 alert('删除失败，请重试');
             }
         });
+
+        // 历史记录按钮
+        historyBtn.addEventListener('click', async () => {
+            historyPanel.classList.add('show');
+            await loadHistory();
+        });
+
+        // 关闭历史记录面板
+        historyClose.addEventListener('click', () => {
+            historyPanel.classList.remove('show');
+        });
+
+        // 加载历史记录
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const data = await response.json();
+
+                if (data.success) {
+                    historyRecords = data.records;
+                    renderHistory();
+                }
+            } catch (error) {
+                console.error('加载历史记录失败:', error);
+            }
+        }
+
+        // 渲染历史记录列表
+        function renderHistory() {
+            if (historyRecords.length === 0) {
+                historyList.innerHTML = '<div style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">暂无历史记录</div>';
+                return;
+            }
+
+            historyList.innerHTML = historyRecords.map(record => {
+                const isActive = record.id === currentPromptId;
+                return `
+                    <div class="history-item ${isActive ? 'active' : ''}" data-id="${record.id}">
+                        <div class="history-item-prompt">${record.prompt}</div>
+                        <div class="history-item-meta">
+                            <span class="history-item-count">📷 ${record.image_count || 0} 张</span>
+                            <button class="history-item-delete" onclick="deleteHistoryItem('${record.id}', event)">删除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 添加点击事件
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', async (e) => {
+                    if (e.target.classList.contains('history-item-delete')) return;
+
+                    const promptId = item.dataset.id;
+                    await switchToHistory(promptId);
+                });
+            });
+        }
+
+        // 切换到历史提示词
+        async function switchToHistory(promptId) {
+            try {
+                const response = await fetch('/api/switch_prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt_id: promptId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentPromptId = promptId;
+                    currentPrompt = data.record.prompt;
+                    images = data.images || [];
+                    currentIndex = 0;
+
+                    // 关闭历史面板
+                    historyPanel.classList.remove('show');
+
+                    // 清空缩略图并重新添加
+                    galleryScroll.innerHTML = '';
+                    images.forEach((img, idx) => {
+                        addThumbnail(img, idx);
+                    });
+
+                    // 显示第一张图片
+                    if (images.length > 0) {
+                        showImage(0);
+                        topBar.classList.add('show');
+                        initialInput.classList.add('hidden');
+                        taskPrompt.textContent = currentPrompt;
+                        taskProgress.textContent = `${images.length}/∞`;
+                    }
+
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('切换历史记录失败:', error);
+                alert('切换失败，请重试');
+            }
+        }
+
+        // 删除历史记录项
+        window.deleteHistoryItem = async function(promptId, event) {
+            event.stopPropagation();
+
+            const confirmed = confirm('确定要删除这条历史记录及所有相关图片吗？');
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`/api/history/${promptId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 如果删除的是当前提示词，清空状态
+                    if (promptId === currentPromptId) {
+                        images = [];
+                        currentPrompt = '';
+                        currentPromptId = null;
+                        currentIndex = 0;
+                        galleryScroll.innerHTML = '';
+                        currentImage.style.display = 'none';
+                        deleteBtn.style.display = 'none';
+                        waitingState.style.display = 'block';
+                        initialInput.classList.remove('hidden');
+                        topBar.classList.remove('show');
+                    }
+
+                    // 重新加载历史记录
+                    await loadHistory();
+                }
+            } catch (error) {
+                console.error('删除历史记录失败:', error);
+                alert('删除失败，请重试');
+            }
+        };
 
         // 修改提示词按钮
         editBtn.addEventListener('click', () => {

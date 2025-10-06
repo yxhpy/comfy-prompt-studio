@@ -193,6 +193,219 @@ def generate_prompt(user_req: str, stream=False, log_callback=None):
 - score_7_up,Photo (from below:1.4),naked photo of an 18-year-old female korean idol ,pale skin,black eyes,small breasts, nipples, comfortable expression,solo, long hair, black hair, nude, navel, pussy, teeth,makeup,lipstick,(arms behind back:1.2), (peeing:1.4555),arms behind head, open mouth, red lips,blunt bangs,She squatted on the grass wearing high heels and peed, pee spurted from her pussy and (the floor was filled with her yellow urine), pee gushing out of her pussy,labia,clitoris,She urinates in front of the camera,knees up,m legs,looking at viewer, parted lips,collarbone,  teeth, open mouth, indoors,spread legs,ass visible through thighs,(pussy close-up:1.2),outdoors,park background, trees
 - kneeling (score_6,score_5,score_4,score_3,score_2,score_1:1),dark-skinned female,source_furry,source_pony,source_cartoon,illustration,3d,2d,painting,cartoons,sketch,female child,signature,username,text,watermark,
 
+# 提示词文档
+## 🎯 什么情况下用什么提示词
+
+### 1. **质量控制场景**
+- **追求最高质量**：`score_9`
+- **高质量生成**：`score_8_up`
+- **平衡质量与多样性**：`score_7_up`（推荐）
+- **更多变化**：`score_5_up`
+
+### 2. **内容分级场景**
+- **安全内容**：`SFW`
+- **成人内容**：`NSFW`
+- **暗示性内容**：`Suggestive`
+
+### 3. **摄影风格场景**
+- **专业摄影**：`DSLR`, `photo (medium)`
+- **景深效果**：`depth_of_field`
+- **自然光线**：`natural lighting`
+- **人工光源**：`neon lights`, `warm lighting`
+
+### 4. **来源平台场景**
+- **社交媒体风格**：`reddit`, `instagram`, `flickr`, `unsplash`
+- **特定社区**：`r/asstastic`, `r/earthporn`
+
+## 📝 完整提示词列表
+
+### **质量评分标签**（必须在开头）
+```
+score_9, score_8_up, score_7_up, score_6_up, score_5_up
+score_8, score_7, score_6, score_5
+```
+
+### **内容分级标签**
+```
+SFW, NSFW, Suggestive
+```
+
+### **媒介类型标签**
+```
+photo (medium), DSLR, photograph, digital photo
+```
+
+### **人物相关标签**
+```
+1girl, 1boy, 2girls, multiple people
+long hair, short hair, blonde hair, black hair, brown hair
+blue eyes, brown eyes, green eyes
+small breasts, large breasts, medium breasts
+standing, sitting, lying, kneeling
+nude, clothed, partially clothed
+```
+
+### **服装标签**
+```
+dress, shirt, skirt, pants, jeans
+bikini, lingerie, underwear
+thighhighs, stockings, pantyhose
+high heels, boots, sneakers
+jewelry, necklace, earrings
+```
+
+### **场景环境标签**
+```
+indoor, outdoor, bedroom, kitchen, bathroom
+beach, forest, city, street, park
+sunset, sunrise, night, day
+rain, snow, cloudy, sunny
+```
+
+### **摄影技术标签**
+```
+depth_of_field, bokeh, macro, close-up
+wide shot, medium shot, portrait
+natural lighting, studio lighting
+soft shadows, hard shadows
+high contrast, low contrast
+```
+
+### **相机设备标签**
+```
+Canon EOS, Nikon, Sony
+35mm, 50mm, 85mm, 135mm
+f/1.4, f/2.8, f/5.6
+ISO 100, ISO 400, ISO 800
+```
+
+### **艺术风格标签**
+```
+realistic, photorealistic, hyperrealistic
+vintage, retro, modern, contemporary
+black and white, sepia, color
+film grain, sharp, soft
+```
+
+### **来源平台标签**
+```
+reddit, instagram, flickr, unsplash
+r/earthporn, r/portraits, r/photography
+```
+
+### **特殊效果标签**
+```
+watermark (避免使用，放负面提示词)
+text "内容" (生成指定文字)
+motion blur, lens flare
+vignette, chromatic aberration
+```
+
+### **身体部位细节标签**
+```
+detailed hands, detailed edges (手部相关必加)
+detailed face, detailed eyes
+detailed skin, skin texture
+freckles, moles, scars
+```
+
+## 🚫 负面提示词推荐
+```
+score_1, score_2, score_3, watermark, low quality, blurry, 
+out of focus, bad anatomy, deformed, mutated, extra limbs,
+missing limbs, bad hands, bad feet, text, signature, username
+```
+
+## 💡 实用提示词组合
+
+### **人像摄影**
+```
+score_8_up, photo (medium), portrait, 1girl, detailed face, 
+natural lighting, depth_of_field, Canon EOS, 85mm, f/1.4
+```
+
+### **风景摄影**
+```
+score_7_up, landscape photography, golden hour, depth_of_field,
+wide shot, natural lighting, high resolution, detailed
+```
+
+### **街拍风格**
+```
+score_7_up, street photography, candid, natural pose, 
+urban environment, natural lighting, 35mm, documentary style
+```
+
+### **专业摄影**
+```
+score_8_up, professional photography, studio lighting, 
+high quality, detailed, DSLR, commercial photography
+```
+### 涉及阴部
+```
+Recreates large and long labia, the exact opposite of an innie. Activate with `LABIAXXL`. Additional helpful prompts below. Please post your gens and leave feedback/advice, as this is my first semi-successful lora.
+
+Spread legs
+Spread pussy
+Rear view
+Large labia
+Pussy juice
+Clitoris/clitoral hood/urethra
+```
+
+### 拍照风格
+```
+trigger word-触发词:
+
+Polaroid,
+
+film photography,
+
+film grain,
+
+film particles,
+
+grainy,
+
+Raw format,
+
+studio lighting,
+
+flash photography,
+
+analog photography aesthetic,
+
+computational photography and Mobile phone image quality,
+
+computational photography and Landline image quality,
+
+computational photography and Pager image quality,
+
+ultrahigh-res,
+
+double exposure,
+
+Fuji C100 shooting、Fuji C200 shooting、Kodak 400 shooting、Kodak gold 200 shooting、Nolan 5219 shooting
+
+--
+
+Negativ-负面:
+
+overexposed background,
+
+poor lighting,
+
+overexposed areas,
+
+uneven lighting,
+
+Low resolution,
+
+potential compression artifact,
+```
+
+这些提示词可以根据需要自由组合使用，记住质量标签必须放在最前面！
+
 # 任务
 - 拓展描述，禁止出现模糊的概念，如美丽的脸部，这里需要清晰的描述脸部，鼻子眉毛耳朵等细节
 - 你需要根据用户输入的描述，输出符合目标样例的提示词，提示词包含返回结果中必须包含正面提示词和负面提示词
@@ -200,6 +413,8 @@ def generate_prompt(user_req: str, stream=False, log_callback=None):
 - 先思考 思考过程放到<think></think>中
 - 返回提示词包含正面和反面提示词<positive_prompt></positive_prompt><negative_prompt></negative_prompt>
 - 提示词中，先一句英语描述主要内容，任务时间地点事件等，再分词描述细节，每个分词之间用逗号隔开
+- 如果提示词中涉及到手部，必须加上这些提示词 'detailed hands,detailed edges'
+- 提示词遵守 bigASP 语法 
 
 # 返回样例
 <positive_prompt>正面提示词</positive_prompt>
@@ -249,7 +464,7 @@ def clear_cache():
     return cache_size
 if __name__ == "__main__":
     positive_prompt, negative_prompt = generate_prompt(
-        "一个韩国空姐在客机上面和机长做爱，机长阴茎插入空姐的阴部。全景照，精致的配饰，卷发， 长发，穿着红底高跟，穿着丝袜，身材九头身，中等乳房大小。 ",
+        "8k照片，一个老师穿着ol在教室里自慰，坐着m腿抬起屁股，手放在大腿，掰开大腿面向观众展示阴部。精致的配饰，卷发，长发，裸脚，穿着丝袜，身材九头身，巨乳，被发现后脸部潮红。 ",
          stream=True)
     print(positive_prompt)
     print(negative_prompt)

@@ -9,6 +9,7 @@ import random
 from dotenv import load_dotenv
 from test import generate_image_with_comfyui
 from generator_prompt import generate_prompt
+from history_manager import history_manager, generate_prompt_id
 
 # 加载环境变量
 load_dotenv()
@@ -37,6 +38,9 @@ generation_queue = queue.Queue()
 current_generation = {
     'is_running': False,
     'current_prompt': None,
+    'prompt_id': None,  # 当前提示词的ID
+    'positive_prompt': None,  # 保存生成的正面提示词
+    'negative_prompt': None,  # 保存生成的负面提示词
     'width': 800,  # Default width
     'height': 1200,  # Default height
     'total_count': 10,
@@ -75,7 +79,21 @@ def worker_thread():
                 current_generation['current_prompt'],
                 stream=True,
                 log_callback=log_callback
-            )            
+            )
+
+            # 保存提示词到全局状态和历史记录
+            current_generation['positive_prompt'] = positive_prompt
+            current_generation['negative_prompt'] = negative_prompt
+
+            # 添加或更新历史记录
+            prompt_id = history_manager.add_record(
+                current_generation['current_prompt'],
+                positive_prompt,
+                negative_prompt,
+                current_generation['width'],
+                current_generation['height']
+            )
+            current_generation['prompt_id'] = prompt_id
 
             # Update progress - generating image
             print(f"Emitting progress (generating image): {current_generation['generated_count']}/{current_generation['total_count']}", flush=True)
@@ -97,22 +115,30 @@ def worker_thread():
 
             # Save images
             for idx, image_data in enumerate(images):
-                filename = f"output_{uuid.uuid4().hex}.png"
-                filepath = os.path.join('static', 'generated', filename)
-                os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                filename = f"{uuid.uuid4().hex}.png"
+                # 新的路径结构: static/generated/[prompt_id]/filename.png
+                prompt_dir = os.path.join('static', 'generated', current_generation['prompt_id'])
+                os.makedirs(prompt_dir, exist_ok=True)
+
+                filepath = os.path.join(prompt_dir, filename)
 
                 with open(filepath, 'wb') as f:
                     f.write(image_data)
 
-                current_generation['images'].append(filename)
+                # 图片文件名包含prompt_id路径
+                image_path = f"{current_generation['prompt_id']}/{filename}"
+                current_generation['images'].append(image_path)
                 current_generation['generated_count'] += 1
 
-                print(f"Generated image {current_generation['generated_count']}/{current_generation['total_count']}: {filename}", flush=True)
+                # 更新历史记录中的图片列表
+                history_manager.update_images(current_generation['prompt_id'], filename)
+
+                print(f"Generated image {current_generation['generated_count']}/{current_generation['total_count']}: {image_path}", flush=True)
 
                 # Emit new image with updated progress
-                print(f"Emitting new_image event: {filename}", flush=True)
+                print(f"Emitting new_image event: {image_path}", flush=True)
                 socketio.emit('new_image', {
-                    'filename': filename,
+                    'filename': image_path,
                     'current': current_generation['generated_count'],
                     'total': current_generation['total_count']
                 }, room='generation')
@@ -245,7 +271,7 @@ def get_prompts():
 def delete_image():
     """删除指定的图片"""
     data = request.json
-    filename = data.get('filename')
+    filename = data.get('filename')  # 格式: prompt_id/image.png
 
     if not filename:
         return jsonify({'success': False, 'message': '缺少文件名参数'})
@@ -261,6 +287,12 @@ def delete_image():
             if os.path.exists(file_path):
                 os.remove(file_path)
 
+            # 从历史记录中移除
+            parts = filename.split('/')
+            if len(parts) == 2:
+                prompt_id, image_name = parts
+                history_manager.remove_image(prompt_id, image_name)
+
             return jsonify({
                 'success': True,
                 'remaining_count': len(current_generation['images']),
@@ -271,6 +303,74 @@ def delete_image():
     except Exception as e:
         print(f"删除图片失败: {e}", flush=True)
         return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/history', methods=['GET'])
+def get_history():
+    """获取所有历史记录"""
+    records = history_manager.get_all_records()
+    return jsonify({
+        'success': True,
+        'records': records
+    })
+
+@app.route('/api/history/<prompt_id>', methods=['GET'])
+def get_history_by_id(prompt_id):
+    """根据ID获取历史记录"""
+    record = history_manager.get_record_by_id(prompt_id)
+    if record:
+        return jsonify({
+            'success': True,
+            'record': record
+        })
+    else:
+        return jsonify({'success': False, 'message': '记录不存在'})
+
+@app.route('/api/history/<prompt_id>', methods=['DELETE'])
+def delete_history(prompt_id):
+    """删除历史记录"""
+    try:
+        # 删除该提示词的所有图片文件
+        prompt_dir = os.path.join('static', 'generated', prompt_id)
+        if os.path.exists(prompt_dir):
+            import shutil
+            shutil.rmtree(prompt_dir)
+
+        # 删除历史记录
+        history_manager.delete_record(prompt_id)
+
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"删除历史记录失败: {e}", flush=True)
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route('/api/switch_prompt', methods=['POST'])
+def switch_prompt():
+    """切换到历史提示词"""
+    data = request.json
+    prompt_id = data.get('prompt_id')
+
+    if not prompt_id:
+        return jsonify({'success': False, 'message': '缺少prompt_id参数'})
+
+    record = history_manager.get_record_by_id(prompt_id)
+    if not record:
+        return jsonify({'success': False, 'message': '历史记录不存在'})
+
+    # 更新当前生成状态
+    current_generation['current_prompt'] = record['prompt']
+    current_generation['prompt_id'] = prompt_id
+    current_generation['positive_prompt'] = record['positive_prompt']
+    current_generation['negative_prompt'] = record['negative_prompt']
+    current_generation['width'] = record['width']
+    current_generation['height'] = record['height']
+    current_generation['images'] = [f"{prompt_id}/{img}" for img in record.get('images', [])]
+    current_generation['generated_count'] = len(current_generation['images'])
+
+    return jsonify({
+        'success': True,
+        'record': record,
+        'images': current_generation['images']
+    })
 
 @app.route('/api/add_more', methods=['POST'])
 def add_more():

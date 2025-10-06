@@ -1,0 +1,50 @@
+[
+  {
+    "id": "ddce14055660",
+    "prompt": "全身照，港风照片，亚洲美女空姐，精致的配饰，卷发，长发，穿着红底高跟，高清摄影8k，穿着丝袜，身材九头身，中等乳房大小。各种摄影常见的pos，跪着，屁股翘起面向观众，掰开内裤展示阴部，高潮脸，流水被中出，高清阴道，背景是飞机上。",
+    "positive_prompt": "score_7_up, NSFW, A full-body photo of an Asian flight attendant in Hong Kong retro style, kneeling on airplane floor with butt raised towards viewer, pulling aside panties to expose vagina, 1girl, Asian features, delicate facial features, defined eyebrows, almond-shaped eyes, straight nose, full lips, orgasm expression, flushed cheeks, medium breasts, 9-heads body proportion, wavy long hair, curled hairstyle, flight attendant uniform, red-soled high heels, sheer stockings, delicate accessories including necklace and earrings, vaginal fluids visible, detailed vagina, labia, clitoris, airplane cabin background with seats and windows, professional photography, 8K resolution, sharp focus, detailed hands, detailed edges, studio lighting, depth of field",
+    "negative_prompt": "score_6, score_5, score_4, score_3, score_2, score_1, blurry, out of focus, low quality, watermark, text, signature, username, deformed, mutated, extra limbs, missing limbs, bad anatomy, bad hands, bad feet, dark-skinned female, female child, illustration, 3d, 2d, painting, cartoons, sketch, overexposed, underexposed",
+    "width": 720,
+    "height": 1280,
+    "created_at": "2025-10-06T11:44:32.810588",
+    "last_used": "2025-10-06T11:45:02.982660",
+    "image_count": 2,
+    "images": [
+      "761f9a12f7b14186856e0d9a3c4a27cf.png",
+      "84361bebdfd04372ac86e1d8ec9f3d57.png"
+    ]
+  },
+  {
+    "id": "b66d57d5f741",
+    "prompt": "8k照片，一个老师穿着ol在教室里自慰，坐着m腿抬起屁股，掰开阴部面向观众展示阴部。精致的配饰，卷发，长发，裸脚，穿着丝袜，身材九头身，巨乳，被发现后脸部潮红。",
+    "positive_prompt": "8k photo of a teacher masturbating in a classroom while wearing office lady attire, solo, (masterpiece,best quality,score_9,score_8_up:1.2), teacher, office lady outfit, white blouse, black skirt, high heels, sitting on chair, M-shaped legs, raised hips, spreading pussy open towards viewer, labia visible, clitoris, masturbation, fingering, nude from waist down, delicate accessories, necklace, earrings, curly long hair, bare feet, wearing stockings, 9-head body proportion, large breasts, nipples, areolas, flushed face, embarrassed expression, red cheeks, classroom setting, desks, blackboard, caught in the act, looking at viewer, intimate moment, detailed skin texture, realistic lighting",
+    "negative_prompt": "worst quality, low quality, lowres, blurry, cartoon, anime, painting, sketch, 3d, 2d, text, watermark, signature, username, logo, female child, dark-skinned female, chubby, bad anatomy, deformed, mutated, extra limbs, missing limbs, poorly drawn hands, poorly drawn face",
+    "width": 720,
+    "height": 1280,
+    "created_at": "2025-10-06T10:01:14.914390",
+    "last_used": "2025-10-06T11:46:14.415203",
+    "image_count": 20,
+    "images": [
+      "82d6cad4334248959c1739afd7480eb8.png",
+      "539cb31138f84227994dec0ce1b1f84c.png",
+      "c03cfe0f87ad4037891a6a7ef572a320.png",
+      "030fcf6a324044958ae2bd3c7edf4761.png",
+      "21bbc50115e04e23a5918514873cf3bf.png",
+      "30a665ced1f9417da9bd473f6c36171c.png",
+      "0e2b7f92bd4e44a392d8aca7ebe51440.png",
+      "91351c89d9a444aa8c49fcc1bad85a69.png",
+      "f33e5e6d858f45a0a364358b2b487aaa.png",
+      "66cd7791b69d414e9a10aed3339cbcba.png",
+      "2ed93d3512324080847a1dc6edc009db.png",
+      "a1e08985330c485a9a5951444ce0218b.png",
+      "7ae34e056dea4ed18161669c116922af.png",
+      "142408c38c7b4e8ab2aca209a0ab0177.png",
+      "94e5a69b8b00409a967fe27cfb6b8c52.png",
+      "6aeaade0cb964412a246012a06b352a1.png",
+      "e9a07cea55d641859d2c08da0823359e.png",
+      "1d135526a3324665b57cf6d49a65e83a.png",
+      "c38170b6fd8841cbb7b7c2f3638444f7.png",
+      "0093b06dd1f44736ad8a19719af86b38.png"
+    ]
+  }
+]

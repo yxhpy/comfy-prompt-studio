@@ -5,8 +5,13 @@ import queue
 import os
 import time
 import uuid
+import random
+from dotenv import load_dotenv
 from test import generate_image_with_comfyui
 from generator_prompt import generate_prompt
+
+# 加载环境变量
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -32,6 +37,8 @@ generation_queue = queue.Queue()
 current_generation = {
     'is_running': False,
     'current_prompt': None,
+    'width': 800,  # Default width
+    'height': 1200,  # Default height
     'total_count': 10,
     'generated_count': 0,
     'images': [],
@@ -58,9 +65,17 @@ def worker_thread():
                 'status': 'generating_prompt'
             }, room='generation')
 
-            # Generate prompt (with cache)
-            positive_prompt, negative_prompt = generate_prompt(current_generation['current_prompt'])
-            # positive_prompt, negative_prompt  = "masterpiece,best quality,score_9, score_8_up, score_7_up:1),RAW,dynamic angle, (classroom setting:1.2), 1girl, (korean woman:1.3), clear facial features, defined eyebrows, prominent nose, large eyes, round cheeks, stockings, high heels, seductive lingerie, jewelry, earrings, necklace, vulva, long legs, 9 head height, pose, closeup, soft lighting, professional photography", "score_6,score_5,score_4,score_3, score_2, score_1:1),source_furry,source_pony,source_cartoon,female child,dark-skinned female,day,(blurry:1.4),(blurred foreground), text, watermark, illustration,3d,2d,painting,cartoons,sketch,overexposed,underexposed,low detail,abstract,emoji,logo"            
+            # 定义日志回调函数，用于实时发送日志到前端
+            def log_callback(message):
+                """实时发送日志到前端"""
+                socketio.emit('log', {'message': message}, room='generation')
+
+            # Generate prompt (with cache) - 使用 stream 模式
+            positive_prompt, negative_prompt = generate_prompt(
+                current_generation['current_prompt'],
+                stream=True,
+                log_callback=log_callback
+            )            
 
             # Update progress - generating image
             print(f"Emitting progress (generating image): {current_generation['generated_count']}/{current_generation['total_count']}", flush=True)
@@ -73,7 +88,12 @@ def worker_thread():
             print(f"Starting generation {current_generation['generated_count'] + 1}/{current_generation['total_count']}", flush=True)
 
             # Generate image using ComfyUI
-            images = generate_image_with_comfyui(positive_prompt, negative_prompt)
+            images = generate_image_with_comfyui(
+                positive_prompt,
+                negative_prompt,
+                width=current_generation['width'],
+                height=current_generation['height']
+            )
 
             # Save images
             for idx, image_data in enumerate(images):
@@ -139,11 +159,15 @@ def start_generation():
     data = request.json
     user_prompt = data.get('prompt')
     count = data.get('count', 10)
+    width = data.get('width', 800)  # Get width from request
+    height = data.get('height', 1200)  # Get height from request
 
     # Update or reset state
     if user_prompt and user_prompt != current_generation['current_prompt']:
         # New prompt - reset everything
         current_generation['current_prompt'] = user_prompt
+        current_generation['width'] = width  # Update width
+        current_generation['height'] = height  # Update height
         current_generation['total_count'] = count
         current_generation['generated_count'] = 0
         current_generation['images'] = []
@@ -181,10 +205,72 @@ def get_status():
     return jsonify({
         'is_running': current_generation['is_running'],
         'current_prompt': current_generation['current_prompt'],
+        'width': current_generation['width'],
+        'height': current_generation['height'],
         'total_count': current_generation['total_count'],
         'generated_count': current_generation['generated_count'],
         'images': current_generation['images']
     })
+
+def get_preset_prompts():
+    """从环境变量读取预设提示词"""
+    prompts = []
+    i = 1
+    while True:
+        prompt_key = f'PROMPT_{i}'
+        prompt_value = os.getenv(prompt_key)
+        if prompt_value:
+            prompts.append(prompt_value)
+            i += 1
+        else:
+            break
+    return prompts
+
+@app.route('/api/prompts', methods=['GET'])
+def get_prompts():
+    """获取预设提示词列表"""
+    prompts = get_preset_prompts()
+    if not prompts:
+        return jsonify({'success': False, 'message': '没有找到预设提示词'})
+
+    # 随机返回一个提示词
+    selected_prompt = random.choice(prompts)
+    return jsonify({
+        'success': True,
+        'prompt': selected_prompt,
+        'all_prompts': prompts
+    })
+
+@app.route('/api/delete_image', methods=['POST'])
+def delete_image():
+    """删除指定的图片"""
+    data = request.json
+    filename = data.get('filename')
+
+    if not filename:
+        return jsonify({'success': False, 'message': '缺少文件名参数'})
+
+    try:
+        # 从图片列表中移除
+        if filename in current_generation['images']:
+            current_generation['images'].remove(filename)
+            current_generation['generated_count'] = len(current_generation['images'])
+
+            # 删除物理文件
+            file_path = os.path.join('static', 'generated', filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+            return jsonify({
+                'success': True,
+                'remaining_count': len(current_generation['images']),
+                'images': current_generation['images']
+            })
+        else:
+            return jsonify({'success': False, 'message': '图片不存在'})
+    except Exception as e:
+        print(f"删除图片失败: {e}", flush=True)
+        return jsonify({'success': False, 'message': str(e)})
 
 @app.route('/api/add_more', methods=['POST'])
 def add_more():

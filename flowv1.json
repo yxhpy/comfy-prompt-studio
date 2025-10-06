@@ -10,7 +10,10 @@
   },
   "3": {
     "inputs": {
-      "text": "(masterpiece,best quality,score_9, score_8_up, score_7_up:1),film grain,8K,Raw format,ultrahigh-res,She is sitting on a chair inside the cafe,backlighting,kpop idol,film photography photo of Korean idol,long hair,hair,(makeup,red lipstick,red lips),black eyes,air bangs,large breasts,grin,teeth,smile, looking at viewer and facing viewer,(completely nude,breasts,nipples,areolas,pubic hair,pussy),round earrings, blush,pussy close-up, sitting and spread legs,necklace,jewelry,indoors,She hides her hands behind her back,ass visible through thighs",
+      "text": [
+        "45",
+        0
+      ],
       "speak_and_recognation": {
         "__value__": [
           false,
@@ -29,7 +32,10 @@
   },
   "4": {
     "inputs": {
-      "text": "(score_6,score_5,score_4,score_3, score_2, score_1:1),source_furry,source_pony,source_cartoon,female child\n(blurry:1.4),(blurred foreground)\noverexposed background,poor lighting,overexposed areas,uneven lighting,Low resolution,potential compression artifact",
+      "text": [
+        "46",
+        0
+      ],
       "speak_and_recognation": {
         "__value__": [
           false,
@@ -48,7 +54,7 @@
   },
   "5": {
     "inputs": {
-      "seed": 367225283643146,
+      "seed": 503303440470893,
       "steps": 30,
       "cfg": 7,
       "sampler_name": "dpmpp_3m_sde",
@@ -106,8 +112,8 @@
   "9": {
     "inputs": {
       "lora_name": "asian beauty face-pony-v1.safetensors",
-      "strength_model": 0.30000000000000004,
-      "strength_clip": 0.30000000000000004,
+      "strength_model": 0.9000000000000001,
+      "strength_clip": 0.9000000000000001,
       "model": [
         "1",
         0
@@ -125,14 +131,14 @@
   "10": {
     "inputs": {
       "lora_name": "spo_sdxl_10ep_4k-data_lora_webui.safetensors",
-      "strength_model": 0.8000000000000002,
-      "strength_clip": 0.8000000000000002,
+      "strength_model": 0.30000000000000004,
+      "strength_clip": 0.30000000000000004,
       "model": [
-        "9",
+        "1",
         0
       ],
       "clip": [
-        "9",
+        "1",
         1
       ]
     },
@@ -146,7 +152,7 @@
       "guide_size": 512,
       "guide_size_for": true,
       "max_size": 1024,
-      "seed": 392227651614158,
+      "seed": 260289567622825,
       "steps": 20,
       "cfg": 7,
       "sampler_name": "dpmpp_3m_sde",
@@ -176,11 +182,11 @@
         0
       ],
       "model": [
-        "1",
+        "9",
         0
       ],
       "clip": [
-        "42",
+        "9",
         1
       ],
       "vae": [
@@ -188,11 +194,11 @@
         2
       ],
       "positive": [
-        "3",
+        "48",
         0
       ],
       "negative": [
-        "4",
+        "49",
         0
       ]
     },
@@ -252,12 +258,12 @@
           {
             "name": "A",
             "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_kxcpn_07215_.png&type=temp&subfolder=&rand=0.20190277415911673"
+            "url": "/api/view?filename=rgthree.compare._temp_ikleu_00289_.png&type=temp&subfolder=&rand=0.6320756564697664"
           },
           {
             "name": "B",
             "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_kxcpn_07216_.png&type=temp&subfolder=&rand=0.44141699164493164"
+            "url": "/api/view?filename=rgthree.compare._temp_ikleu_00290_.png&type=temp&subfolder=&rand=0.9562420165992094"
           }
         ]
       },
@@ -291,8 +297,8 @@
   "38": {
     "inputs": {
       "lora_name": "sdsFILM_v40-sdxl-V1.safetensors",
-      "strength_model": 0.8000000000000002,
-      "strength_clip": 0.8000000000000002,
+      "strength_model": 0.30000000000000004,
+      "strength_clip": 0.30000000000000004,
       "model": [
         "10",
         0
@@ -367,8 +373,8 @@
   "42": {
     "inputs": {
       "lora_name": "pornmaster-realistic-Illustrious-V3.safetensors",
-      "strength_model": 0.25000000000000006,
-      "strength_clip": 0.25000000000000006,
+      "strength_model": 0.10000000000000002,
+      "strength_clip": 0.10000000000000002,
       "model": [
         "41",
         0
@@ -381,6 +387,80 @@
     "class_type": "LoraLoader",
     "_meta": {
       "title": "加载LoRA"
+    }
+  },
+  "45": {
+    "inputs": {
+      "value": "(masterpiece,best quality,score_9,score_8_up:1.2),RAW photo,classroom setting,blackboard,desks,25-year-old Korean female teacher,pale skin,delicate facial features,large black eyes,double eyelids,high nose bridge,small cherry lips,pointed chin,long black hair,lingerie,fishnet stockings,high heels,standing pose,visible legs,9-head body proportions,slender legs,detailed labia close-up,facial jewelry,sparkling accessories,earrings,necklace,makeup,red lipstick,blush,looking at viewer,professional lighting,sharp focus",
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      }
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "字符串（多行）"
+    }
+  },
+  "46": {
+    "inputs": {
+      "value": "worst quality,low quality,blurry,lowres,female child,dark-skinned female,illustration,3d,2d,painting,cartoons,sketch,text,watermark,signature,username,underwear,normal clothes,full body shot from far,blurred foreground,overexposed",
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      }
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": {
+      "title": "字符串（多行）"
+    }
+  },
+  "48": {
+    "inputs": {
+      "text": [
+        "45",
+        0
+      ],
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      },
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码"
+    }
+  },
+  "49": {
+    "inputs": {
+      "text": [
+        "46",
+        0
+      ],
+      "speak_and_recognation": {
+        "__value__": [
+          false,
+          true
+        ]
+      },
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP文本编码"
     }
   }
 }

@@ -98,13 +98,15 @@ def get_history(prompt_id, server_address="127.0.0.1:8188"):
     return response.json()
 
 
-def generate_image_with_comfyui(positive_prompt, negative_prompt, workflow_path="flowv1.json", server_address="127.0.0.1:8188"):
+def generate_image_with_comfyui(positive_prompt, negative_prompt, width=800, height=1200, workflow_path="flowv1.json", server_address="127.0.0.1:8188"):
     """
     Generate image using ComfyUI workflow
 
     Args:
         positive_prompt: Positive prompt text
         negative_prompt: Negative prompt text
+        width: Image width (default 800)
+        height: Image height (default 1200)
         workflow_path: Path to workflow JSON file
         server_address: ComfyUI server address
 
@@ -119,9 +121,15 @@ def generate_image_with_comfyui(positive_prompt, negative_prompt, workflow_path=
 
     # Update prompts in workflow
     if "3" in workflow:
-        workflow["3"]["inputs"]["text"] = positive_prompt
+        workflow["45"]["inputs"]["value"] = positive_prompt
     if "4" in workflow:
-        workflow["4"]["inputs"]["text"] = negative_prompt
+        workflow["46"]["inputs"]["value"] = negative_prompt
+
+    # Update image dimensions
+    if "6" in workflow:
+        workflow["6"]["inputs"]["width"] = width
+        workflow["6"]["inputs"]["height"] = height
+        print(f"📐 图片尺寸: {width}x{height}", flush=True)
 
     # Update all seeds to random values
     if "5" in workflow and "inputs" in workflow["5"] and "seed" in workflow["5"]["inputs"]:

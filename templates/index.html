@@ -58,6 +58,14 @@
             50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
         }
 
+        .form-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
         .initial-input h1 {
             color: white;
             font-size: 36px;
@@ -78,23 +86,26 @@
             z-index: 1;
         }
 
+        .input-wrapper {
+            width: 100%;
+            position: relative;
+            margin-bottom: 24px;
+        }
+
         .initial-input textarea {
             width: 100%;
-            max-width: 500px;
-            padding: 24px;
+            padding: 24px 60px 24px 24px; /* 右边留出空间给刷新按钮 */
             border: 2px solid rgba(99, 102, 241, 0.3);
             border-radius: 20px;
             font-size: 16px;
             resize: none;
             min-height: 140px;
-            margin-bottom: 24px;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             color: white;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
+            box-sizing: border-box;
         }
 
         .initial-input textarea::placeholder {
@@ -108,8 +119,38 @@
             box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
         }
 
+        .refresh-prompt-btn {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: rgba(99, 102, 241, 0.8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .refresh-prompt-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+            color: rgba(99, 102, 241, 1);
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .refresh-prompt-btn:active {
+            transform: translateY(-50%) rotate(180deg) scale(0.95);
+        }
+
         .initial-input .submit-btn {
-            padding: 16px 56px;
+            width: 100%;
+            padding: 16px;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             border: none;
@@ -120,8 +161,8 @@
             box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
             transition: all 0.3s ease;
             position: relative;
-            z-index: 1;
             overflow: hidden;
+            box-sizing: border-box;
         }
 
         .initial-input .submit-btn::before {
@@ -149,6 +190,115 @@
 
         .initial-input .submit-btn:active {
             transform: translateY(0);
+        }
+
+        /* 尺寸选择器样式 */
+        .size-selector {
+            width: 100%;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .size-selector label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .size-dropdown {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M2 4L6 8L10 4' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+            position: relative;
+            z-index: 11;
+            box-sizing: border-box;
+        }
+
+        .size-dropdown:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .size-dropdown:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.8);
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .size-dropdown option {
+            background: #1a1a2e;
+            color: white;
+            padding: 10px;
+        }
+
+        .screen-size-display {
+            margin-top: 8px;
+            font-size: 12px;
+            color: rgba(99, 102, 241, 0.8);
+            text-align: center;
+        }
+
+        .custom-size-toggle {
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(99, 102, 241, 0.8);
+            cursor: pointer;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .custom-size-toggle:hover {
+            color: rgba(99, 102, 241, 1);
+        }
+
+        .custom-size-inputs {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+            position: relative;
+            z-index: 11;
+        }
+
+        .custom-size-inputs.show {
+            display: grid;
+        }
+
+        .custom-size-inputs input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .custom-size-inputs input:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.6);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .custom-size-inputs input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
         }
 
         /* 顶部栏 */
@@ -347,6 +497,48 @@
             background: rgba(99, 102, 241, 1);
         }
 
+        /* 日志显示区域 */
+        .log-container {
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .log-container.show {
+            display: block;
+        }
+
+        .log-content {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 4px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+
         @keyframes blink {
             0%, 100% {
                 opacity: 1;
@@ -461,6 +653,38 @@
             }
         }
 
+        /* 删除按钮 */
+        .delete-btn {
+            position: absolute;
+            top: 70px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 50;
+            opacity: 0.7;
+            backdrop-filter: blur(10px);
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+            background: rgba(239, 68, 68, 1);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+        }
+
+        .delete-btn:active {
+            transform: scale(0.95);
+        }
+
         /* 等待状态 */
         .waiting-state {
             position: absolute;
@@ -564,6 +788,17 @@
             to {
                 opacity: 1;
                 transform: translate(-50%, 0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
@@ -735,10 +970,45 @@
 <body>
     <!-- 初始输入界面 -->
     <div id="initialInput" class="initial-input">
-        <h1>✨ AI 图片生成</h1>
-        <p class="subtitle">描述你的想象，让 AI 为你创作</p>
-        <textarea id="promptInput" placeholder="例如：一只可爱的猫咪在星空下..."></textarea>
-        <button id="submitBtn" class="submit-btn">开始创作 →</button>
+        <div class="form-container">
+            <h1>✨ AI 图片生成</h1>
+            <p class="subtitle">描述你的想象，让 AI 为你创作</p>
+
+            <!-- 输入框容器 -->
+            <div class="input-wrapper">
+                <textarea id="promptInput" placeholder="例如：一只可爱的猫咪在星空下..."></textarea>
+                <button id="refreshPromptBtn" class="refresh-prompt-btn" title="换一个提示词">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 4v6h6"></path>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 尺寸选择器 -->
+            <div class="size-selector">
+                <label>选择图片尺寸</label>
+                <select class="size-dropdown" id="sizeSelect">
+                <option value="screen" selected>当前屏幕</option>
+                <option value="800x1200">默认竖屏 (800×1200)</option>
+                <option value="1200x800">横屏 (1200×800)</option>
+                <option value="1024x1024">正方形 (1024×1024)</option>
+                <option value="1080x1920">手机竖屏 (1080×1920)</option>
+                <option value="1920x1080">手机横屏 (1920×1080)</option>
+                <option value="720x1280">小尺寸竖屏 (720×1280)</option>
+                <option value="1440x2560">2K 竖屏 (1440×2560)</option>
+                <option value="768x1024">平板竖屏 (768×1024)</option>
+                <option value="custom">自定义尺寸...</option>
+            </select>
+            <div class="screen-size-display" id="screenSizeDisplay"></div>
+            <div class="custom-size-inputs" id="customSizeInputs">
+                <input type="number" id="customWidth" placeholder="宽度" min="256" max="2048">
+                <input type="number" id="customHeight" placeholder="高度" min="256" max="2048">
+            </div>
+        </div>
+
+            <button id="submitBtn" class="submit-btn">开始创作 →</button>
+        </div>
     </div>
 
     <!-- 顶部栏 -->
@@ -764,6 +1034,10 @@
                 <button id="continueBtn" class="btn continue-btn" style="display: none;">▶ 继续</button>
                 <button id="editBtn" class="btn edit-btn">✏ 换词</button>
             </div>
+            <!-- 日志显示区域 -->
+            <div class="log-container" id="logContainer">
+                <div class="log-content" id="logContent"></div>
+            </div>
         </div>
     </div>
 
@@ -771,6 +1045,14 @@
     <div id="mainViewer" class="main-viewer">
         <div class="image-container" id="imageContainer">
             <img id="currentImage" class="current-image" style="display: none;">
+            <button id="deleteBtn" class="delete-btn" title="删除这张图片" style="display: none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+            </button>
             <div id="waitingState" class="waiting-state">
                 <div class="spinner"></div>
                 <p id="waitingText">正在生成图片...</p>
@@ -816,6 +1098,7 @@
         const mainViewer = document.getElementById('mainViewer');
         const imageContainer = document.getElementById('imageContainer');
         const currentImage = document.getElementById('currentImage');
+        const deleteBtn = document.getElementById('deleteBtn');
         const waitingState = document.getElementById('waitingState');
         const imageCounter = document.getElementById('imageCounter');
         const statusIndicator = document.getElementById('statusIndicator');
@@ -826,15 +1109,28 @@
         const stopBtn = document.getElementById('stopBtn');
         const continueBtn = document.getElementById('continueBtn');
         const editBtn = document.getElementById('editBtn');
+        const logContainer = document.getElementById('logContainer');
+        const logContent = document.getElementById('logContent');
         const waitingText = document.getElementById('waitingText');
         const imageGallery = document.getElementById('imageGallery');
         const galleryToggle = document.getElementById('galleryToggle');
         const galleryScroll = document.getElementById('galleryScroll');
+        const sizeSelect = document.getElementById('sizeSelect');
+        const screenSizeDisplay = document.getElementById('screenSizeDisplay');
+        const customSizeInputs = document.getElementById('customSizeInputs');
+        const customWidth = document.getElementById('customWidth');
+        const customHeight = document.getElementById('customHeight');
+
+        // 获取屏幕尺寸
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
 
         // 状态变量
         let images = [];
         let currentIndex = 0;
         let currentPrompt = '';
+        let selectedWidth = screenWidth;  // 默认使用屏幕宽度
+        let selectedHeight = screenHeight; // 默认使用屏幕高度
         let isGenerating = false;
         let autoTriggerEnabled = true;
         let statusPollingInterval = null;
@@ -843,6 +1139,104 @@
         let lastSwipeDirection = ''; // 'up' or 'down'
         let swipeHintDismissed = false; // 用户是否已关闭下滑提示
         let isTopBarExpanded = false; // 顶部栏展开状态
+
+        // 初始化显示屏幕尺寸
+        function updateScreenSizeDisplay() {
+            if (sizeSelect.value === 'screen') {
+                screenSizeDisplay.textContent = `当前屏幕尺寸: ${screenWidth}×${screenHeight}`;
+                screenSizeDisplay.style.display = 'block';
+            } else {
+                screenSizeDisplay.style.display = 'none';
+            }
+        }
+
+        // 页面加载时显示屏幕尺寸
+        updateScreenSizeDisplay();
+
+        // 尺寸选择器事件处理
+        sizeSelect.addEventListener('change', () => {
+            const value = sizeSelect.value;
+
+            if (value === 'screen') {
+                // 使用屏幕尺寸
+                selectedWidth = screenWidth;
+                selectedHeight = screenHeight;
+                customSizeInputs.classList.remove('show');
+                updateScreenSizeDisplay();
+            } else if (value === 'custom') {
+                // 显示自定义输入框
+                customSizeInputs.classList.add('show');
+                screenSizeDisplay.style.display = 'none';
+                // 设置默认自定义值
+                if (!customWidth.value) customWidth.value = selectedWidth;
+                if (!customHeight.value) customHeight.value = selectedHeight;
+                selectedWidth = parseInt(customWidth.value) || 800;
+                selectedHeight = parseInt(customHeight.value) || 1200;
+            } else {
+                // 使用预设尺寸
+                const [width, height] = value.split('x').map(Number);
+                selectedWidth = width;
+                selectedHeight = height;
+                customSizeInputs.classList.remove('show');
+                screenSizeDisplay.style.display = 'none';
+            }
+        });
+
+        // 自定义尺寸输入更新
+        customWidth.addEventListener('input', () => {
+            if (sizeSelect.value === 'custom') {
+                selectedWidth = parseInt(customWidth.value) || 800;
+            }
+        });
+
+        customHeight.addEventListener('input', () => {
+            if (sizeSelect.value === 'custom') {
+                selectedHeight = parseInt(customHeight.value) || 1200;
+            }
+        });
+
+        // 刷新提示词按钮
+        const refreshPromptBtn = document.getElementById('refreshPromptBtn');
+        refreshPromptBtn.addEventListener('click', async () => {
+            try {
+                // 获取当前输入框内容
+                const currentText = promptInput.value.trim();
+
+                // 调用API获取新的提示词
+                const response = await fetch('/api/prompts');
+                const data = await response.json();
+
+                if (data.success) {
+                    const newPrompt = data.prompt;
+
+                    // 如果输入框有内容，显示确认对话框
+                    if (currentText) {
+                        const confirmed = confirm(`即将替换当前内容：\n"${currentText}"\n\n替换为：\n"${newPrompt}"\n\n确认替换？`);
+                        if (confirmed) {
+                            promptInput.value = newPrompt;
+                            // 添加动画效果
+                            promptInput.style.animation = 'fadeIn 0.5s ease';
+                            setTimeout(() => {
+                                promptInput.style.animation = '';
+                            }, 500);
+                        }
+                    } else {
+                        // 直接替换
+                        promptInput.value = newPrompt;
+                        // 添加动画效果
+                        promptInput.style.animation = 'fadeIn 0.5s ease';
+                        setTimeout(() => {
+                            promptInput.style.animation = '';
+                        }, 500);
+                    }
+                } else {
+                    console.error('获取提示词失败:', data.message);
+                }
+            } catch (error) {
+                console.error('获取提示词失败:', error);
+                alert('获取提示词失败，请检查配置');
+            }
+        });
 
         // 展开/收起顶部栏
         expandBtn.addEventListener('click', () => {
@@ -875,6 +1269,8 @@
                 swipeHintDismissed = false; // 重置提示状态
                 autoTriggerEnabled = true; // 重置自动触发
                 galleryScroll.innerHTML = ''; // 清空缩略图
+                logContent.textContent = ''; // 清空日志
+                logContainer.classList.remove('show'); // 隐藏日志区域
             }
 
             // 动画隐藏初始输入界面
@@ -895,11 +1291,16 @@
                 waitingState.style.display = 'block';
             }
 
-            // 开始生成（无限模式，不设置count）
+            // 开始生成（无限模式，不设置count），包含尺寸参数
             const response = await fetch('/api/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt, count: 999999 })
+                body: JSON.stringify({
+                    prompt,
+                    count: 999999,
+                    width: selectedWidth,
+                    height: selectedHeight
+                })
             });
 
             if (response.ok) {
@@ -963,6 +1364,7 @@
             const thumb = document.createElement('div');
             thumb.className = 'gallery-thumb';
             thumb.dataset.index = index;
+            thumb.dataset.filename = filename; // 添加文件名以便删除时查找
 
             thumb.innerHTML = `
                 <img src="/static/generated/${filename}" alt="图片 ${index + 1}">
@@ -1006,6 +1408,7 @@
             currentImage.src = `/static/generated/${images[index]}?t=${Date.now()}`;
             currentImage.style.display = 'block';
             waitingState.style.display = 'none';
+            deleteBtn.style.display = 'flex'; // 显示删除按钮
 
             updateUI();
         }
@@ -1114,6 +1517,8 @@
                     // 恢复状态
                     images = status.images || [];
                     currentPrompt = status.current_prompt || '';
+                    selectedWidth = status.width || 800;
+                    selectedHeight = status.height || 1200;
                     autoTriggerEnabled = !status.is_running;
                     isGenerating = status.is_running;
 
@@ -1182,13 +1587,71 @@
             const response = await fetch('/api/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: currentPrompt, count: 999999 })
+                body: JSON.stringify({
+                    prompt: currentPrompt,
+                    count: 999999,
+                    width: selectedWidth,
+                    height: selectedHeight
+                })
             });
 
             if (response.ok) {
                 continueBtn.style.display = 'none';
                 stopBtn.style.display = 'flex';
                 startPolling();
+            }
+        });
+
+        // 删除按钮
+        deleteBtn.addEventListener('click', async () => {
+            if (images.length === 0) return;
+
+            const currentFilename = images[currentIndex];
+            const confirmed = confirm(`确定要删除这张图片吗？\n\n图片：${currentFilename}`);
+
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/api/delete_image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: currentFilename })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 更新本地图片列表
+                    images = result.images;
+
+                    // 删除缩略图
+                    const thumbToRemove = document.querySelector(`.gallery-thumb[data-filename="${currentFilename}"]`);
+                    if (thumbToRemove) {
+                        thumbToRemove.remove();
+                    }
+
+                    // 如果还有图片，显示下一张或上一张
+                    if (images.length > 0) {
+                        // 调整当前索引
+                        if (currentIndex >= images.length) {
+                            currentIndex = images.length - 1;
+                        }
+                        showImage(currentIndex);
+                    } else {
+                        // 没有图片了，隐藏删除按钮和图片
+                        currentImage.style.display = 'none';
+                        deleteBtn.style.display = 'none';
+                        waitingState.style.display = 'block';
+                        document.getElementById('waitingText').textContent = '所有图片已删除';
+                    }
+
+                    updateUI();
+                } else {
+                    alert('删除失败: ' + result.message);
+                }
+            } catch (error) {
+                console.error('删除图片失败:', error);
+                alert('删除失败，请重试');
             }
         });
 
@@ -1205,6 +1668,9 @@
             initialInput.classList.remove('hidden');
             promptInput.value = currentPrompt;
             promptInput.focus();
+
+            // 恢复尺寸选择器状态
+            updateScreenSizeDisplay();
         });
 
         // 点击下滑提示关闭
@@ -1226,11 +1692,24 @@
             // 根据状态更新等待文字
             if (data.status === 'generating_prompt') {
                 waitingText.textContent = '正在生成提示词...';
+                // 生成提示词时显示日志区域
+                logContainer.classList.add('show');
             } else if (data.status === 'generating_image') {
                 waitingText.textContent = '正在生成图片...';
             } else {
                 waitingText.textContent = '正在生成图片...';
             }
+        });
+
+        // Socket日志处理
+        socket.on('log', (data) => {
+            console.log('收到日志:', data.message);
+
+            // 添加日志到显示区域
+            logContent.textContent += data.message;
+
+            // 自动滚动到底部
+            logContainer.scrollTop = logContainer.scrollHeight;
         });
 
         // Socket错误处理

@@ -47,13 +47,15 @@ def chat_with_ollama(model_name, prompt, stream=False):
         return result.get('response', '')
 
 
-def chat_conversation(model_name, messages):
+def chat_conversation(model_name, messages, stream=False, callback=None):
     """
     Have a conversation using the chat endpoint
 
     Args:
         model_name: Name of the model
         messages: List of message dicts with 'role' and 'content'
+        stream: Whether to stream the response
+        callback: Function to call for each chunk (only used when stream=True)
 
     Returns:
         The assistant's response
@@ -63,40 +65,75 @@ def chat_conversation(model_name, messages):
     payload = {
         "model": model_name,
         "messages": messages,
-        "stream": False
+        "stream": stream
     }
 
-    response = requests.post(url, json=payload)
-    result = response.json()
+    response = requests.post(url, json=payload, stream=stream)
 
-    return result.get('message', {}).get('content', '')
+    if stream:
+        # Handle streaming response
+        full_response = ""
+        for line in response.iter_lines():
+            if line:
+                json_response = json.loads(line)
+                if 'message' in json_response and 'content' in json_response['message']:
+                    chunk = json_response['message']['content']
+                    full_response += chunk
+                    if callback:
+                        callback(chunk)
+                    else:
+                        print(chunk, end='', flush=True)
+        if not callback:
+            print()  # New line at the end
+        return full_response
+    else:
+        result = response.json()
+        return result.get('message', {}).get('content', '')
 
 
-def chat_with_gemini(messages):
+def chat_with_gemini(messages, stream=False, callback=None):
     """
     Have a conversation using Gemini API via OpenAI-compatible endpoint
 
     Args:
         messages: List of message dicts with 'role' and 'content'
+        stream: Whether to stream the response
+        callback: Function to call for each chunk (only used when stream=True)
 
     Returns:
         The assistant's response
     """
     api_key = os.getenv('GEMINI_API_KEY')
     model_name = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash-exp')
+    base_url = os.getenv('GEMINI_BASE_URL', 'https://api.laozhang.ai/v1/')
 
     client = OpenAI(
         api_key=api_key,
-        base_url="https://api.laozhang.ai/v1/"
+        base_url=base_url
     )
 
     try:
         response = client.chat.completions.create(
             model=model_name,
-            messages=messages
+            messages=messages,
+            stream=stream
         )
 
-        return response.choices[0].message.content
+        if stream:
+            full_response = ""
+            for chunk in response:
+                if chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
+                    full_response += content
+                    if callback:
+                        callback(content)
+                    else:
+                        print(content, end='', flush=True)
+            if not callback:
+                print()  # New line at the end
+            return full_response
+        else:
+            return response.choices[0].message.content
     except Exception as e:
         print(f"❌ Gemini API 错误: {str(e)}", flush=True)
         raise
@@ -104,27 +141,35 @@ def chat_with_gemini(messages):
 # 提示词缓存
 _prompt_cache = {}
 
-def generate_prompt(user_req: str):
+def generate_prompt(user_req: str, stream=False, log_callback=None):
     """
     生成提示词，带缓存机制
 
     Args:
         user_req: 用户需求描述
+        stream: 是否使用流式输出
+        log_callback: 日志回调函数，用于实时输出日志
 
     Returns:
         (positive_prompt, negative_prompt) 元组
     """
+    def log(msg):
+        """统一的日志输出函数"""
+        print(msg, flush=True)
+        if log_callback:
+            log_callback(msg)
+
     # 检查缓存
     if user_req in _prompt_cache:
-        print(f"✅ 使用缓存的提示词（用户需求: {user_req[:30]}...）", flush=True)
+        log(f"✅ 使用缓存的提示词（用户需求: {user_req[:30]}...）")
         return _prompt_cache[user_req]
 
     # 获取 AI Provider 配置
     provider = os.getenv('AI_PROVIDER', 'ollama').lower()
-    print(f"🤖 使用 AI Provider: {provider}", flush=True)
+    log(f"🤖 使用 AI Provider: {provider}")
 
     # 生成新的提示词
-    print(f"🔄 生成新的提示词（用户需求: {user_req[:30]}...）", flush=True)
+    log(f"🔄 生成新的提示词（用户需求: {user_req[:30]}...）")
 
     messages = [
         {"role": "system", "content": """
@@ -154,6 +199,7 @@ def generate_prompt(user_req: str):
 - 生成的提示词必须满足用户的需求，不能超出用户的描述
 - 先思考 思考过程放到<think></think>中
 - 返回提示词包含正面和反面提示词<positive_prompt></positive_prompt><negative_prompt></negative_prompt>
+- 提示词中，先一句英语描述主要内容，任务时间地点事件等，再分词描述细节，每个分词之间用逗号隔开
 
 # 返回样例
 <positive_prompt>正面提示词</positive_prompt>
@@ -162,19 +208,35 @@ def generate_prompt(user_req: str):
     ]
     messages.append({"role": "user", "content": user_req})
 
+    # 定义流式回调函数
+    stream_buffer = []
+    def stream_callback(chunk):
+        """处理流式输出的每个chunk"""
+        stream_buffer.append(chunk)
+        if log_callback:
+            log_callback(chunk)
+        else:
+            print(chunk, end='', flush=True)
+
     # 根据 provider 调用不同的 API
+    log(f"📡 开始调用 AI 生成提示词...")
     if provider == 'gemini':
-        response = chat_with_gemini(messages)
+        response = chat_with_gemini(messages, stream=stream, callback=stream_callback if stream else None)
     else:  # default to ollama
         model = os.getenv('OLLAMA_MODEL', 'huihui_ai/qwen3-abliterated:30b')
-        response = chat_conversation(model, messages)
+        response = chat_conversation(model, messages, stream=stream, callback=stream_callback if stream else None)
+
+    if stream and not log_callback:
+        print()  # 换行
+
+    log(f"✅ AI 生成完成，开始解析提示词...")
 
     positive_prompt = response.split("<positive_prompt>")[1].split("</positive_prompt>")[0]
     negative_prompt = response.split("<negative_prompt>")[1].split("</negative_prompt>")[0]
 
     # 缓存结果
     _prompt_cache[user_req] = (positive_prompt, negative_prompt)
-    print(f"💾 提示词已缓存，缓存数量: {len(_prompt_cache)}", flush=True)
+    log(f"💾 提示词已缓存，缓存数量: {len(_prompt_cache)}")
 
     return positive_prompt, negative_prompt
 
@@ -186,6 +248,8 @@ def clear_cache():
     print(f"🗑️ 已清空提示词缓存，清除了 {cache_size} 条记录", flush=True)
     return cache_size
 if __name__ == "__main__":
-    positive_prompt, negative_prompt = generate_prompt("一个精致面容美丽的韩国老师在教室中穿着丝袜，美丽的配饰，站起来能看到高跟鞋，穿着骚气的情趣内衣，精美饰品装饰了脸部，特写阴唇，美腿，9头身")
+    positive_prompt, negative_prompt = generate_prompt(
+        "一个韩国空姐在客机上面和机长做爱，机长阴茎插入空姐的阴部。全景照，精致的配饰，卷发， 长发，穿着红底高跟，穿着丝袜，身材九头身，中等乳房大小。 ",
+         stream=True)
     print(positive_prompt)
     print(negative_prompt)

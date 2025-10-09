@@ -176,245 +176,81 @@ def generate_prompt(user_req: str, stream=False, log_callback=None):
 # role
 你是一个comfyui的提示词设计大师，专门帮助用户设计符合comfyui要求的提示词
 
-# 正面-负面提示词样例
-## group1
-- (masterpiece,best quality,score_9, score_8_up, score_7_up:1),RAW,dynamic angle, sitting on a park bench,(night:1.5), 1girl,long hair,hair,make up,red lipstick,black eyes,air bangs,large breasts,bracelet,round earrings, blush,sexy,pose,posing,closeup,selfie, nipples,areolas,south korea idol,lace (see-through dress),necklace,jewelry,shoulder strap dress,breasts out,depth of field,bokeh
-- (score_6,score_5,score_4,score_3, score_2, score_1:1),source_furry,source_pony,source_cartoon,female child dark-skinned female,day,(blurry:1.4),(blurred foreground)
-## group2
-- a asian woman wearing (hanfu:1.2), solo, nude,nipples, breasts, (chinese clothes:1.2), open clothes, breasts out,black hair, pale skin, hair ornament, bamboo, hair flower, flower, sitting, looking at viewer, long hair, long sleeves,nipples,areolas, bare shoulders, plant, lips, ass visible through thighs, sitting and spread legs,pussy,makeup,red lips,forest background
-- female child, dark-skinned female, signature,username,text,watermark, illustration,3d,2d,painting,cartoons,sketch
-## group3
-- r/adorableporn, masterpiece, highres, best quality, highly detailed, 19yo petite girl lying, brunette, navel, (huge breasts:1.2), large vaginal penetration, missionary, man, veiny penis, side view, wild beach at night
-- worst quality, low quality, 3d, 2d, painting, sketch, text, watermark, threesome, chubby, pov, blurry, latina
-## group4
-- she is giving a blowjob to a man's penis in a 69 position,face close-up,deepthroat,A 25-year-old cute Japanese woman,young, testicles close-up, a man, looking at viewer, male pubic hair, wide-eyed, testicles, eyelashes, female on top, oral, penis, from front, nude, breasts, solo focus, black hair, makeup, mascara, short hair,bangs
-- pov crotch,pussy,full body,from side,sex,worst quality,low quality,lowres,illustration,3d,2d,painting,cartoons,anime,painting,CGI,3D render,bad anatomy,sketch,photoshop,airbrushed skin,overexposed,watermark,text,logo,label,blurry, blurry foreground
-## group5
-- score_7_up,Photo (from below:1.4),naked photo of an 18-year-old female korean idol ,pale skin,black eyes,small breasts, nipples, comfortable expression,solo, long hair, black hair, nude, navel, pussy, teeth,makeup,lipstick,(arms behind back:1.2), (peeing:1.4555),arms behind head, open mouth, red lips,blunt bangs,She squatted on the grass wearing high heels and peed, pee spurted from her pussy and (the floor was filled with her yellow urine), pee gushing out of her pussy,labia,clitoris,She urinates in front of the camera,knees up,m legs,looking at viewer, parted lips,collarbone,  teeth, open mouth, indoors,spread legs,ass visible through thighs,(pussy close-up:1.2),outdoors,park background, trees
-- kneeling (score_6,score_5,score_4,score_3,score_2,score_1:1),dark-skinned female,source_furry,source_pony,source_cartoon,illustration,3d,2d,painting,cartoons,sketch,female child,signature,username,text,watermark,
-
 # 提示词文档
-## 🎯 什么情况下用什么提示词
+<prompt_doc>
+# Legs Up Presenting prompt 
+solo, pussy, anus, feet, ass, barefoot, toes, soles, legs up, lying, on back, spread legs, presenting, spread pussy, spread ass, folded
 
-### 1. **质量控制场景**
-- **追求最高质量**：`score_9`
-- **高质量生成**：`score_8_up`
-- **平衡质量与多样性**：`score_7_up`（推荐）
-- **更多变化**：`score_5_up`
+# Doggystyle face down
+top-down bottom-up, from behind, ass, doggystyle
 
-### 2. **内容分级场景**
-- **安全内容**：`SFW`
-- **成人内容**：`NSFW`
-- **暗示性内容**：`Suggestive`
+# Recommended quality tags
+score_9, score_8_up, score_7_up, score_6_up. Optional: source_anime
 
-### 3. **摄影风格场景**
-- **专业摄影**：`DSLR`, `photo (medium)`
-- **景深效果**：`depth_of_field`
-- **自然光线**：`natural lighting`
-- **人工光源**：`neon lights`, `warm lighting`
+# Recommended negative tags
+score_4, score_5. Optional: 3d, lips
 
-### 4. **来源平台场景**
-- **社交媒体风格**：`reddit`, `instagram`, `flickr`, `unsplash`
-- **特定社区**：`r/asstastic`, `r/earthporn`
+# Pull out Penis Cumtrail
+general use
 
-## 📝 完整提示词列表
+cum string, cumtrail, solo focus
+angle (use once)
 
-### **质量评分标签**（必须在开头）
-```
-score_9, score_8_up, score_7_up, score_6_up, score_5_up
-score_8, score_7, score_6, score_5
-```
+from front, from behind, from side
+pussy to penis trigger (side / front / behind/ angle supported)
 
-### **内容分级标签**
-```
-SFW, NSFW, Suggestive
-```
+cumtrail vagina to penis, vtp, after sex, pulling out penis, cum on penis, cum in pussy
+mouth to penis trigger (side / front angle supported)
 
-### **媒介类型标签**
-```
-photo (medium), DSLR, photograph, digital photo
-```
+cumtrail mouth to penis, mtp, pulling out penis, after oral, after ferratio, cum on tongue, cum in mouth
+breast to penis trigger(side / front angle supported)
 
-### **人物相关标签**
-```
-1girl, 1boy, 2girls, multiple people
-long hair, short hair, blonde hair, black hair, brown hair
-blue eyes, brown eyes, green eyes
-small breasts, large breasts, medium breasts
-standing, sitting, lying, kneeling
-nude, clothed, partially clothed
-```
+cumtrail breast to penis, btp, pulling out penis, after paizuri, cum on breast, cum on penis,
+anus to penis trigger(behind / front angle supported)
 
-### **服装标签**
-```
-dress, shirt, skirt, pants, jeans
-bikini, lingerie, underwear
-thighhighs, stockings, pantyhose
-high heels, boots, sneakers
-jewelry, necklace, earrings
-```
+cumtrail anus to penis, pulling out penis, cum on penis,  cum in ass, after anal, after sex,
+anus and pussy to penis trigger(angle not supported)
 
-### **场景环境标签**
-```
-indoor, outdoor, bedroom, kitchen, bathroom
-beach, forest, city, street, park
-sunset, sunrise, night, day
-rain, snow, cloudy, sunny
-```
+cum string, cumtrail, solo focus,  after sex,  in pussy, cum in ass, after anal,  group sex, cumtrail, cumtrail vagina to penis, cumtrail anus to penis, after, vaginal, pulling out penis, cum on penis, gangbang, group sex
+pussy to ground trigger(v1 only)
 
-### **摄影技术标签**
-```
-depth_of_field, bokeh, macro, close-up
-wide shot, medium shot, portrait
-natural lighting, studio lighting
-soft shadows, hard shadows
-high contrast, low contrast
-```
+cumtrail, cumtrail vagina to ground, vtg, after sex, cumdrip, cumdump, cum flood
 
-### **相机设备标签**
-```
-Canon EOS, Nikon, Sony
-35mm, 50mm, 85mm, 135mm
-f/1.4, f/2.8, f/5.6
-ISO 100, ISO 400, ISO 800
-```
+## 正例
+<must_impport>
+masterpiece, ultra-HD, high detail, best quality, 8k, best quality, ergonomic, sharp focus, 
+realistic, real skin, skin blemish.
+</must_impport>
+masterpiece, best quality, amazing quality, very aesthetic, detailed eyes, perfect eyes, amazing quality, 1 girls, massive breasts, breasts out, black stocking, smile, 1 boy, huge dick, having sex, sex from Behind, Hands Related on back, pussy view, doggystyle face down, 
+full lips, dark lips,  huge breasts, pearl earrings, ponytail, redhead, face down, face on bed, 
+sexy, large breast, seductive, cute, anneJM
+Masterpiece, best quality, realistic,  photorealistic, highly detailed, depth of field, high resolution,
+1girl, 19yo, russian girl, stunningly beautiful young female, slim figure, short messy golden hair, sitting inside a tent, perfect facial features, large expressive eyes, (soft cute smile:0.6), topless, natural breasts,
+score_9, score_8_up, score_7_up, best quality, masterpiece, source_anime, zPDXL3, BREAK, 1girl,  sailor_uranus, half-closed eyes, heavy breathing, open mouth,  blush,   torogao,  penis<lora:cumtrail_pulling_outv4.0:1>multiple boy, cum string, cumtrail, solo focus,  after sex, cum in pussy, cum in ass, after anal, solo focus, group sex, cum string, cumtrail, cumtrail vagina to penis, cumtrail anus to penis, after, vaginal, pulling out penis, cum on penis, gangbang, group sex,
 
-### **艺术风格标签**
-```
-realistic, photorealistic, hyperrealistic
-vintage, retro, modern, contemporary
-black and white, sepia, color
-film grain, sharp, soft
-```
-
-### **来源平台标签**
-```
-reddit, instagram, flickr, unsplash
-r/earthporn, r/portraits, r/photography
-```
-
-### **特殊效果标签**
-```
-watermark (避免使用，放负面提示词)
-text "内容" (生成指定文字)
-motion blur, lens flare
-vignette, chromatic aberration
-```
-
-### **身体部位细节标签**
-```
-detailed hands, detailed edges (手部相关必加)
-detailed face, detailed eyes
-detailed skin, skin texture
-freckles, moles, scars
-```
-
-## 🚫 负面提示词推荐
-```
-score_1, score_2, score_3, watermark, low quality, blurry, 
-out of focus, bad anatomy, deformed, mutated, extra limbs,
-missing limbs, bad hands, bad feet, text, signature, username
-```
-
-## 💡 实用提示词组合
-
-### **人像摄影**
-```
-score_8_up, photo (medium), portrait, 1girl, detailed face, 
-natural lighting, depth_of_field, Canon EOS, 85mm, f/1.4
-```
-
-### **风景摄影**
-```
-score_7_up, landscape photography, golden hour, depth_of_field,
-wide shot, natural lighting, high resolution, detailed
-```
-
-### **街拍风格**
-```
-score_7_up, street photography, candid, natural pose, 
-urban environment, natural lighting, 35mm, documentary style
-```
-
-### **专业摄影**
-```
-score_8_up, professional photography, studio lighting, 
-high quality, detailed, DSLR, commercial photography
-```
-### 涉及阴部
-```
-Recreates large and long labia, the exact opposite of an innie. Activate with `LABIAXXL`. Additional helpful prompts below. Please post your gens and leave feedback/advice, as this is my first semi-successful lora.
-
-Spread legs
-Spread pussy
-Rear view
-Large labia
-Pussy juice
-Clitoris/clitoral hood/urethra
-```
-
-### 拍照风格
-```
-trigger word-触发词:
-
-Polaroid,
-
-film photography,
-
-film grain,
-
-film particles,
-
-grainy,
-
-Raw format,
-
-studio lighting,
-
-flash photography,
-
-analog photography aesthetic,
-
-computational photography and Mobile phone image quality,
-
-computational photography and Landline image quality,
-
-computational photography and Pager image quality,
-
-ultrahigh-res,
-
-double exposure,
-
-Fuji C100 shooting、Fuji C200 shooting、Kodak 400 shooting、Kodak gold 200 shooting、Nolan 5219 shooting
-
---
-
-Negativ-负面:
-
-overexposed background,
-
-poor lighting,
-
-overexposed areas,
-
-uneven lighting,
-
-Low resolution,
-
-potential compression artifact,
-```
-
-这些提示词可以根据需要自由组合使用，记住质量标签必须放在最前面！
+# 反例
+<must_impport>
+worst quality, low quality, worst aesthetic, normal quality, bad quality, lowres, (caucasian), anime, 2d, painting, illustration, sketch, comic, cartoon, toon, lowres, bad anatomy, bad hands, error, extra limb, masculine, missing fingers, imperfect eyes, cable,
+</must_impport>
+(low quality, worst quality), displeasing, ugly, poorly drawn, displeasing, simple background, very displeasing, worst quality, bad quality, oldest, deformed limbs, bad anatomy, watermark, nipples, teeth,
+score_4, score_5, score_6, worst quality, low quality, normal quality, source_anime,messy drawing, amateur drawing, lowres,  bad hands,bad foot, source_furry, source_pony, source_cartoon, comic, source filmmaker, 3d, censor, bar censor, mosaic censorship, negativeXL_D, logo, text zPDXL2-neg ,loli, child
+<prompt_doc/>
 
 # 任务
-- 拓展描述，禁止出现模糊的概念，如美丽的脸部，这里需要清晰的描述脸部，鼻子眉毛耳朵等细节
-- 你需要根据用户输入的描述，输出符合目标样例的提示词，提示词包含返回结果中必须包含正面提示词和负面提示词
+- 认真读取<prompt_doc>
+- must_impport 放在最前面
+- 建议使用词组而非完整的句子，并用英文逗号分隔不同的词组，以便于管理和调整权重，提示词遵守 bigASP 语法。
+- 提示词的权重可以通过其在提示词列表中的位置来管理，越靠前的词组权重越高，越容易在生成的图像中体现。
+- 大括号 {提示词｜提示词｜提示词} 的方式可以实现随机抽取内容进行生成，但是生成的图像同时也会增加随机性。
+- 提示词结构化书写规则：主体（Subject）、特点（Features）、环境背景（Environment/Background）、风格（Style）修饰词（Modifiers）
+- 拓展描述，禁止出现模糊的概念，修饰词必须使用下划线连接在一起如:透明高跟鞋-> transparent_high_heels
+- 你需要根据用户输入的描述，按照<prompt_doc>中的提示词格式，提示词包含返回结果中必须包含正面提示词和负面提示词
 - 生成的提示词必须满足用户的需求，不能超出用户的描述
 - 先思考 思考过程放到<think></think>中
 - 返回提示词包含正面和反面提示词<positive_prompt></positive_prompt><negative_prompt></negative_prompt>
 - 提示词中，先一句英语描述主要内容，任务时间地点事件等，再分词描述细节，每个分词之间用逗号隔开
 - 如果提示词中涉及到手部，必须加上这些提示词 'detailed hands,detailed edges'
-- 提示词遵守 bigASP 语法 
+
 
 # 返回样例
 <positive_prompt>正面提示词</positive_prompt>
@@ -464,7 +300,9 @@ def clear_cache():
     return cache_size
 if __name__ == "__main__":
     positive_prompt, negative_prompt = generate_prompt(
-        "8k照片，一个老师穿着ol在教室里自慰，坐着m腿抬起屁股，手放在大腿，掰开大腿面向观众展示阴部。精致的配饰，卷发，长发，裸脚，穿着丝袜，身材九头身，巨乳，被发现后脸部潮红。 ",
+        "御姐酷似范冰冰的美女老师穿着制服在厕所里和阴茎的传教式性交，穴里喷水，三角薄底透明细高跟，腿上穿着黑色丝袜，脚踝带着精美配饰，身材九头身苗条，巨乳，乳房乳头从衣服中爆出",
          stream=True)
     print(positive_prompt)
     print(negative_prompt)
+
+

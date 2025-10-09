@@ -192,6 +192,33 @@
             transform: translateY(0);
         }
 
+        .initial-history-btn {
+            margin-top: 16px;
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 2;
+        }
+
+        .initial-history-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.5);
+            color: white;
+        }
+
+        .initial-history-btn:active {
+            transform: scale(0.98);
+        }
+
         /* 尺寸选择器样式 */
         .size-selector {
             width: 100%;
@@ -557,7 +584,7 @@
             height: 100vh;
             background: rgba(26, 26, 46, 0.98);
             backdrop-filter: blur(20px);
-            z-index: 200;
+            z-index: 1001;  /* 必须高于初始输入界面的 1000 */
             transition: right 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -1131,6 +1158,11 @@
         </div>
 
             <button id="submitBtn" class="submit-btn">开始创作 →</button>
+
+            <!-- 历史记录按钮 -->
+            <button id="initialHistoryBtn" class="initial-history-btn">
+                📝 查看历史记录
+            </button>
         </div>
     </div>
 
@@ -1259,6 +1291,7 @@
         const customSizeInputs = document.getElementById('customSizeInputs');
         const customWidth = document.getElementById('customWidth');
         const customHeight = document.getElementById('customHeight');
+        const initialHistoryBtn = document.getElementById('initialHistoryBtn');
 
         // 获取屏幕尺寸
         const screenWidth = window.screen.width;
@@ -1796,11 +1829,26 @@
             }
         });
 
-        // 历史记录按钮
+        // 历史记录按钮（顶部栏）
         historyBtn.addEventListener('click', async () => {
             historyPanel.classList.add('show');
             await loadHistory();
         });
+
+        // 历史记录按钮（首页）
+        if (initialHistoryBtn) {
+            initialHistoryBtn.addEventListener('click', async () => {
+                console.log('首页历史按钮被点击');
+                console.log('historyPanel 元素:', historyPanel);
+                console.log('添加 show 类之前:', historyPanel.classList.contains('show'));
+                historyPanel.classList.add('show');
+                console.log('添加 show 类之后:', historyPanel.classList.contains('show'));
+                console.log('面板当前样式 right:', window.getComputedStyle(historyPanel).right);
+                await loadHistory();
+            });
+        } else {
+            console.error('未找到 initialHistoryBtn 元素');
+        }
 
         // 关闭历史记录面板
         historyClose.addEventListener('click', () => {
@@ -1810,30 +1858,44 @@
         // 加载历史记录
         async function loadHistory() {
             try {
+                console.log('开始加载历史记录...');
                 const response = await fetch('/api/history');
+                console.log('历史记录响应状态:', response.status);
                 const data = await response.json();
+                console.log('历史记录数据:', data);
 
                 if (data.success) {
                     historyRecords = data.records;
+                    console.log('历史记录数量:', historyRecords.length);
                     renderHistory();
+                } else {
+                    console.error('获取历史记录失败:', data.message);
+                    historyList.innerHTML = '<div style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">加载失败，请重试</div>';
                 }
             } catch (error) {
                 console.error('加载历史记录失败:', error);
+                historyList.innerHTML = '<div style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">加载失败：' + error.message + '</div>';
             }
         }
 
         // 渲染历史记录列表
         function renderHistory() {
+            console.log('renderHistory 被调用, 记录数:', historyRecords.length);
+
             if (historyRecords.length === 0) {
+                console.log('没有历史记录');
                 historyList.innerHTML = '<div style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">暂无历史记录</div>';
                 return;
             }
 
-            historyList.innerHTML = historyRecords.map(record => {
+            console.log('开始渲染历史记录...');
+            const html = historyRecords.map(record => {
                 const isActive = record.id === currentPromptId;
+                // 限制提示词显示长度
+                const displayPrompt = record.prompt.length > 100 ? record.prompt.substring(0, 100) + '...' : record.prompt;
                 return `
                     <div class="history-item ${isActive ? 'active' : ''}" data-id="${record.id}">
-                        <div class="history-item-prompt">${record.prompt}</div>
+                        <div class="history-item-prompt">${displayPrompt}</div>
                         <div class="history-item-meta">
                             <span class="history-item-count">📷 ${record.image_count || 0} 张</span>
                             <button class="history-item-delete" onclick="deleteHistoryItem('${record.id}', event)">删除</button>
@@ -1842,15 +1904,25 @@
                 `;
             }).join('');
 
+            console.log('生成的 HTML 长度:', html.length);
+            historyList.innerHTML = html;
+            console.log('HTML 已设置到 historyList');
+
             // 添加点击事件
-            document.querySelectorAll('.history-item').forEach(item => {
+            const items = document.querySelectorAll('.history-item');
+            console.log('找到历史项数量:', items.length);
+
+            items.forEach(item => {
                 item.addEventListener('click', async (e) => {
                     if (e.target.classList.contains('history-item-delete')) return;
 
                     const promptId = item.dataset.id;
+                    console.log('点击历史项:', promptId);
                     await switchToHistory(promptId);
                 });
             });
+
+            console.log('历史记录渲染完成');
         }
 
         // 切换到历史提示词
@@ -1870,6 +1942,10 @@
                     images = data.images || [];
                     currentIndex = 0;
 
+                    // 同步尺寸参数
+                    selectedWidth = data.record.width || 800;
+                    selectedHeight = data.record.height || 1200;
+
                     // 关闭历史面板
                     historyPanel.classList.remove('show');
 
@@ -1886,7 +1962,18 @@
                         initialInput.classList.add('hidden');
                         taskPrompt.textContent = currentPrompt;
                         taskProgress.textContent = `${images.length}/∞`;
+                    } else {
+                        // 没有图片，也要显示顶部栏
+                        topBar.classList.add('show');
+                        initialInput.classList.add('hidden');
+                        taskPrompt.textContent = currentPrompt;
+                        taskProgress.textContent = `0/∞`;
                     }
+
+                    // 更新按钮状态 - 显示继续按钮
+                    stopBtn.style.display = 'none';
+                    continueBtn.style.display = 'flex';
+                    statusIndicator.classList.remove('show');
 
                     updateUI();
                 }

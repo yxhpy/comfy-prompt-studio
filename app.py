@@ -365,6 +365,8 @@ def switch_prompt():
     current_generation['height'] = record['height']
     current_generation['images'] = [f"{prompt_id}/{img}" for img in record.get('images', [])]
     current_generation['generated_count'] = len(current_generation['images'])
+    # 重置 total_count，确保可以继续生成
+    current_generation['total_count'] = current_generation['generated_count']
 
     return jsonify({
         'success': True,

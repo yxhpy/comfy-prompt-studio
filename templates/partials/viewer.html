@@ -1,0 +1,25 @@
+<!-- 主图片显示区域 -->
+<div id="mainViewer" class="main-viewer">
+    <div class="image-container" id="imageContainer">
+        <img id="currentImage" class="current-image" style="display: none;">
+        <button id="deleteBtn" class="delete-btn" title="删除这张图片" style="display: none;">
+            <i class="fa-regular fa-trash-can"></i>
+        </button>
+        <div id="waitingState" class="waiting-state">
+            <div class="spinner"></div>
+            <p id="waitingText">正在生成图片...</p>
+        </div>
+    </div>
+</div>
+
+<!-- 下滑提示 -->
+<div id="swipeHint" class="swipe-hint" style="display: none;">
+    <span>下滑查看更多</span>
+    <span class="arrow">↓</span>
+</div>
+
+<!-- 无更多图片提示 -->
+<div id="noMoreHint" class="no-more-hint">正在生成更多图片...</div>
+
+<!-- 加载更多提示 -->
+<div id="loadingMore" class="loading-more">正在生成更多图片...</div>

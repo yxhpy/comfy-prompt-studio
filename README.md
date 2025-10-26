@@ -15,6 +15,25 @@ AI 图像生成 Web 应用 - Ollama 提示词增强 + ComfyUI 工作流 + Flask 
 pip install -r requirements.txt
 ```
 
+### 配置环境变量
+
+```bash
+# 复制环境变量模板
+cp .env.example .env
+
+# 编辑 .env 文件，填入你的配置
+# 注意：.env 包含敏感信息（API密钥），不会被提交到 git
+```
+
+`.env` 文件示例（参考 `.env.example`）：
+
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your-api-key-here
+GEMINI_MODEL=your-model-name
+GEMINI_BASE_URL=https://your-api-endpoint.com/v1/
+```
+
 ### 验证安装
 
 ```bash
@@ -75,36 +94,15 @@ comfyui/
 │   ├── workflows/           # ComfyUI 工作流
 │   └── settings.py          # 配置类
 ├── data/                     # 数据存储
-│   ├── generated/           # 生成的图片
-│   ├── upload/              # 上传的图片
-│   └── history.json         # 历史记录
-└── tests/                    # 测试文件
+│   ├── generated/           # 生成的图片（不提交）
+│   ├── upload/              # 上传的图片（不提交）
+│   └── history.db           # SQLite 历史记录（不提交）
+├── tests/                    # 测试文件
+├── .env                      # 环境变量（不提交，包含敏感信息）
+└── .env.example             # 环境变量模板（可提交）
 ```
 
-## 环境变量配置
-
-创建 `.env` 文件：
-
-```env
-# AI Provider
-AI_PROVIDER=ollama  # 或 gemini
-OLLAMA_MODEL=huihui_ai/qwen3-abliterated:30b
-OLLAMA_URL=http://localhost:11434
-
-# Gemini (可选)
-GEMINI_API_KEY=your_key
-GEMINI_MODEL=gemini-2.0-flash-exp
-GEMINI_BASE_URL=https://api.laozhang.ai/v1/
-
-# ComfyUI
-COMFYUI_SERVER=127.0.0.1:8188
-
-# Flask
-FLASK_HOST=0.0.0.0
-FLASK_PORT=5000
-FLASK_DEBUG=True
-SECRET_KEY=your-secret-key
-```
+**注意**: 带有"（不提交）"标记的文件/目录已在 `.gitignore` 中忽略
 
 ## 开发状态
 

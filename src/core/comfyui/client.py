@@ -1,9 +1,14 @@
-import requests
 import json
-import uuid
-import websocket
+import os
+import random
 import time
-from generator_prompt import generate_prompt
+import uuid
+from pathlib import Path
+
+import requests
+import websocket
+
+from src.core.prompt.generator import generate_prompt
 
 def chat_with_ollama(model_name, prompt, stream=False):
     """
@@ -118,21 +123,22 @@ def generate_image_with_comfyui(positive_prompt, negative_prompt, width=800, hei
     import os
 
     # Auto-select workflow based on image_path
+    project_root = Path(__file__).resolve().parents[3]
+
     if workflow_path is None:
-        if image_path:
-            # 优先使用新位置，向后兼容旧位置
-            if os.path.exists("config/workflows/flow_face.json"):
-                workflow_path = "config/workflows/flow_face.json"
-            else:
-                workflow_path = "flowjson/flow_face.json"
-            print(f"🖼️ 使用人脸替换工作流: {workflow_path}", flush=True)
-        else:
-            # 优先使用新位置，向后兼容旧位置
-            if os.path.exists("config/workflows/flowv_normal.json"):
-                workflow_path = "config/workflows/flowv_normal.json"
-            else:
-                workflow_path = "flowjson/flowv_normal.json"
-            print(f"📝 使用普通文生图工作流: {workflow_path}", flush=True)
+        face = project_root / "config" / "workflows" / "flow_face.json"
+        normal = project_root / "config" / "workflows" / "flowv_normal.json"
+
+        workflow_path = face if image_path else normal
+
+    workflow_path = Path(workflow_path)
+    if not workflow_path.exists():
+        raise FileNotFoundError(f"未找到工作流文件: {workflow_path}")
+
+    if image_path:
+        print(f"🖼️ 使用人脸替换工作流: {workflow_path}", flush=True)
+    else:
+        print(f"📝 使用普通文生图工作流: {workflow_path}", flush=True)
 
     # Load workflow
     with open(workflow_path, 'r', encoding='utf-8') as f:

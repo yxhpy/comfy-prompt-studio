@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 """测试worker线程"""
 
+import os
 import sys
 import time
 import threading
-from test import generate_image_with_comfyui
-from generator_prompt import generate_prompt
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.core.comfyui.client import generate_image_with_comfyui
+from src.core.prompt.generator import generate_prompt
 
 # 模拟current_generation状态
 current_generation = {

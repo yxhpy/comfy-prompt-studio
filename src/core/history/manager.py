@@ -5,17 +5,12 @@ SQLite 版本的历史记录管理器
 import sqlite3
 import hashlib
 import os
-import sys
-import io
 from datetime import datetime
 from typing import List, Dict, Optional
 from contextlib import contextmanager
 
-# 设置标准输出编码为 UTF-8（Windows 兼容）
-if sys.platform == 'win32':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-
-DB_FILE = 'data/history.db'
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+DB_FILE = os.path.join(PROJECT_ROOT, 'data/history.db')
 
 def generate_prompt_id(prompt: str) -> str:
     """根据提示词生成唯一ID"""
@@ -26,10 +21,11 @@ class HistoryManager:
     """历史记录管理器 - SQLite 版本"""
 
     def __init__(self, db_path: str = DB_FILE):
+        if not os.path.isabs(db_path):
+            db_path = os.path.join(PROJECT_ROOT, db_path)
         self.db_path = db_path
 
-        # 确保目录存在
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
 
         # 初始化数据库
         self._init_database()
@@ -90,8 +86,6 @@ class HistoryManager:
                 ON images(prompt_id)
             ''')
 
-            print(f"✅ SQLite 数据库初始化完成: {self.db_path}", flush=True)
-
     def add_record(self, prompt: str, positive_prompt: str, negative_prompt: str,
                    width: int, height: int) -> str:
         """添加新记录或更新已存在的记录"""
@@ -112,7 +106,6 @@ class HistoryManager:
                     SET last_used = ?
                     WHERE id = ?
                 ''', (now, prompt_id))
-                print(f"📝 更新历史记录: {prompt_id}", flush=True)
             else:
                 # 创建新记录
                 cursor.execute('''
@@ -120,7 +113,6 @@ class HistoryManager:
                     (id, prompt, positive_prompt, negative_prompt, width, height, created_at, last_used, image_count)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
                 ''', (prompt_id, prompt, positive_prompt, negative_prompt, width, height, now, now))
-                print(f"✅ 创建历史记录: {prompt_id}", flush=True)
 
         return prompt_id
 
@@ -132,7 +124,9 @@ class HistoryManager:
             row = cursor.fetchone()
 
             if row:
-                return dict(row)
+                record = dict(row)
+                record['images'] = self.get_images_by_prompt_id(prompt_id)
+                return record
             return None
 
     def update_images(self, prompt_id: str, image_filename: str):
@@ -158,8 +152,6 @@ class HistoryManager:
                 WHERE id = ?
             ''', (prompt_id, now, prompt_id))
 
-            print(f"📷 添加图片到历史: {image_filename} -> {prompt_id}", flush=True)
-
     def remove_image(self, prompt_id: str, image_filename: str):
         """从记录中移除图片"""
         with self.get_connection() as conn:
@@ -179,8 +171,6 @@ class HistoryManager:
                 )
                 WHERE id = ?
             ''', (prompt_id, prompt_id))
-
-            print(f"🗑️ 从历史中移除图片: {image_filename}", flush=True)
 
     def get_images_by_prompt_id(self, prompt_id: str) -> List[str]:
         """获取指定提示词的所有图片"""
@@ -223,8 +213,6 @@ class HistoryManager:
             # 删除提示词记录
             cursor.execute('DELETE FROM prompts WHERE id = ?', (prompt_id,))
 
-            print(f"🗑️ 删除历史记录: {prompt_id}", flush=True)
-
     def get_statistics(self) -> Dict:
         """获取统计信息"""
         with self.get_connection() as conn:
@@ -248,42 +236,3 @@ class HistoryManager:
 
 # 全局实例
 history_manager = HistoryManager()
-
-
-if __name__ == '__main__':
-    # 测试代码
-    print("=" * 60)
-    print("测试 SQLite 历史记录管理器")
-    print("=" * 60)
-
-    # 测试添加记录
-    prompt_id = history_manager.add_record(
-        prompt="测试提示词",
-        positive_prompt="positive test",
-        negative_prompt="negative test",
-        width=1024,
-        height=1024
-    )
-    print(f"\n创建记录 ID: {prompt_id}")
-
-    # 测试添加图片
-    history_manager.update_images(prompt_id, "test_image_1.png")
-    history_manager.update_images(prompt_id, "test_image_2.png")
-
-    # 测试获取记录
-    record = history_manager.get_record_by_id(prompt_id)
-    print(f"\n获取记录: {record}")
-
-    # 测试获取图片列表
-    images = history_manager.get_images_by_prompt_id(prompt_id)
-    print(f"图片列表: {images}")
-
-    # 测试获取所有记录
-    all_records = history_manager.get_all_records()
-    print(f"\n所有记录数量: {len(all_records)}")
-
-    # 测试统计信息
-    stats = history_manager.get_statistics()
-    print(f"\n统计信息: {stats}")
-
-    print("\n✅ 测试完成")

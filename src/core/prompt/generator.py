@@ -1,11 +1,21 @@
-import requests
 import json
 import os
+from pathlib import Path
+
+import requests
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# Load environment variables
-load_dotenv()
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _load_env():
+    # Load environment variables from project root
+    env_path = PROJECT_ROOT / ".env"
+    load_dotenv(dotenv_path=env_path if env_path.exists() else None)
+
+
+_load_env()
 
 def chat_with_ollama(model_name, prompt, stream=False):
     """
@@ -301,9 +311,8 @@ def clear_cache():
     return cache_size
 if __name__ == "__main__":
     positive_prompt, negative_prompt = generate_prompt(
-        "韩国美女在厕所蹲便池蹲着撒尿时被偷拍，下体特写，自下而上，能看到穴和人脸",
+        "xxxxxxxxxxxxxxxxxxxxxxx",
          stream=True)
     print(positive_prompt)
     print(negative_prompt)
-
 

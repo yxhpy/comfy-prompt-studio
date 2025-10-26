@@ -1,0 +1,30 @@
+<!-- 顶部栏 -->
+<div id="topBar" class="top-bar">
+    <!-- 精简模式 -->
+    <div class="top-bar-compact">
+        <span class="counter" id="imageCounter">1/1</span>
+        <div class="status-indicator" id="statusIndicator">
+            <div class="status-dot"></div>
+            <span id="statusText">生成中</span>
+        </div>
+        <button class="expand-btn" id="expandBtn"><i class="fa-solid fa-chevron-down"></i></button>
+    </div>
+
+    <!-- 展开模式 -->
+    <div class="top-bar-expanded" id="topBarExpanded">
+        <div class="prompt-row">
+            <span class="prompt-text" id="taskPrompt"></span>
+            <span class="progress-badge" id="taskProgress">0/∞</span>
+        </div>
+        <div class="button-row">
+            <button id="stopBtn" class="btn stop-btn" style="display: none;"><i class="fa-solid fa-circle-pause"></i><span>暂停</span></button>
+            <button id="continueBtn" class="btn continue-btn" style="display: none;"><i class="fa-solid fa-circle-play"></i><span>继续</span></button>
+            <button id="editBtn" class="btn edit-btn"><i class="fa-solid fa-pen"></i><span>换词</span></button>
+            <button id="historyBtn" class="btn history-btn"><i class="fa-regular fa-clock"></i><span>历史</span></button>
+        </div>
+        <!-- 日志显示区域 -->
+        <div class="log-container" id="logContainer">
+            <div class="log-content" id="logContent"></div>
+        </div>
+    </div>
+</div>

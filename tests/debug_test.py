@@ -2,10 +2,14 @@
 # -*- coding: utf-8 -*-
 """调试测试脚本 - 测试图片生成流程"""
 
+import os
 import sys
 import traceback
-from generator_prompt import generate_prompt
-from test import generate_image_with_comfyui
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.core.prompt.generator import generate_prompt
+from src.core.comfyui.client import generate_image_with_comfyui
 
 def test_prompt_generation():
     """测试提示词生成"""

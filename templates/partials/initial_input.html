@@ -1,0 +1,64 @@
+<!-- 初始输入界面 -->
+<div id="initialInput" class="initial-input">
+    <div class="form-container">
+        <h1>AI 图像创作助手</h1>
+        <p class="subtitle">用简洁描述传达灵感，其余交给智能生成</p>
+
+        <!-- 输入框容器 -->
+        <div class="input-group">
+            <label for="promptInput">创作描述</label>
+            <div class="input-wrapper">
+                <textarea id="promptInput" placeholder="例如：一只可爱的猫咪在星空下..."></textarea>
+                <button id="refreshPromptBtn" class="refresh-prompt-btn" title="换一个提示词">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 尺寸选择器 -->
+        <div class="size-selector">
+            <label>选择图片尺寸</label>
+            <select class="size-dropdown" id="sizeSelect">
+                <option value="screen" selected>当前屏幕</option>
+                <option value="800x1200">默认竖屏 (800×1200)</option>
+                <option value="1200x800">横屏 (1200×800)</option>
+                <option value="1024x1024">正方形 (1024×1024)</option>
+                <option value="1080x1920">手机竖屏 (1080×1920)</option>
+                <option value="1920x1080">手机横屏 (1920×1080)</option>
+                <option value="720x1280">小尺寸竖屏 (720×1280)</option>
+                <option value="1440x2560">2K 竖屏 (1440×2560)</option>
+                <option value="768x1024">平板竖屏 (768×1024)</option>
+                <option value="custom">自定义尺寸...</option>
+            </select>
+            <div class="screen-size-display" id="screenSizeDisplay"></div>
+            <div class="custom-size-inputs" id="customSizeInputs">
+                <input type="number" id="customWidth" placeholder="宽度" min="256" max="2048">
+                <input type="number" id="customHeight" placeholder="高度" min="256" max="2048">
+            </div>
+        </div>
+
+        <!-- 图片上传区域 -->
+        <div class="image-upload-section">
+            <label class="upload-label">上传参考图片（可选）</label>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                    <i class="fa-regular fa-image"></i>
+                    <p>
+                        点击或拖拽上传图片
+                        <span>支持人脸替换功能</span>
+                    </p>
+                </div>
+                <div class="image-preview" id="imagePreview" style="display: none;">
+                    <img id="previewImg" src="" alt="预览">
+                    <button class="remove-image" id="removeImage" title="删除图片">✕</button>
+                </div>
+            </div>
+        </div>
+
+        <button id="submitBtn" class="submit-btn">开始生成</button>
+
+        <!-- 历史记录按钮 -->
+        <button id="initialHistoryBtn" class="initial-history-btn">浏览历史作品</button>
+    </div>
+</div>

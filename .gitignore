@@ -50,8 +50,6 @@ htmlcov/
 data/history.db
 *.sqlite
 *.sqlite3
-# Keep test database for cleanup
-!data/history.db
 
 # Temporary files
 *.tmp

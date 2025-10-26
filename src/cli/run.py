@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 """
-ComfyUI Web Application 启动入口
+Console entry that mimics the original run.py helper.
 """
 import os
 import sys
+from pathlib import Path
 
-# 将项目根目录添加到 Python 路径
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Ensure project root on path
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-# 使用现有的 app.py（向后兼容）
-from app import app, socketio
+from .serve import main as run_server  # noqa: E402
 
-if __name__ == '__main__':
-    # 从环境变量获取配置
-    host = os.getenv('FLASK_HOST', '0.0.0.0')
-    port = int(os.getenv('FLASK_PORT', 5000))
-    debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
 
-    print(f"""
+def banner() -> str:
+    host = os.getenv("FLASK_HOST", "0.0.0.0")
+    port = int(os.getenv("FLASK_PORT", 5000))
+    debug = os.getenv("FLASK_DEBUG", "False").lower() == "true"
+
+    return f"""
     ╔═══════════════════════════════════════════════════════════╗
     ║   ComfyUI Web Application                                 ║
     ║   AI 图像生成服务已启动                                    ║
@@ -27,18 +29,13 @@ if __name__ == '__main__':
     ║   工作流目录: config/workflows/                           ║
     ║   数据目录: data/ (新) / static/generated/ (旧)          ║
     ╚═══════════════════════════════════════════════════════════╝
-    """, flush=True)
+    """
 
-    # 确保必要的目录存在
-    os.makedirs('static/generated', exist_ok=True)
-    os.makedirs('data/generated', exist_ok=True)
-    os.makedirs('data/upload', exist_ok=True)
-    os.makedirs('upload', exist_ok=True)
 
-    socketio.run(
-        app,
-        host=host,
-        port=port,
-        debug=debug,
-        allow_unsafe_werkzeug=True
-    )
+def main() -> None:
+    print(banner(), flush=True)
+    run_server()
+
+
+if __name__ == "__main__":
+    main()

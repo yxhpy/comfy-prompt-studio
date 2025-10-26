@@ -30,16 +30,14 @@ ENV/
 
 # Logs
 *.log
-logs/
 app.log
 
-# Generated files
+# Generated files (NEW: data directory)
+data/generated/
+data/upload/
+# OLD: keep for backward compatibility
 static/generated/
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.webp
+upload/
 
 # Testing
 .coverage
@@ -49,9 +47,11 @@ htmlcov/
 .hypothesis/
 
 # Database
-*.db
+data/history.db
 *.sqlite
 *.sqlite3
+# Keep test database for cleanup
+!data/history.db
 
 # Temporary files
 *.tmp
@@ -59,18 +59,6 @@ htmlcov/
 *.backup
 temp/
 tmp/
-
-# Node (if any frontend build tools are used)
-node_modules/
-package-lock.json
-yarn.lock
-
-# ComfyUI specific
-output/
-temp/
-models/
-custom_nodes/
-web/extensions/
 
 # System files
 Thumbs.db

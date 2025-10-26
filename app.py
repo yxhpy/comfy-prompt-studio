@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_file, session
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from werkzeug.utils import secure_filename
 import threading
 import queue
 import os
@@ -16,7 +17,14 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 限制上传文件大小为16MB
+app.config['UPLOAD_FOLDER'] = 'upload'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
+
 socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Track connected clients
 connected_clients = set()
@@ -41,6 +49,7 @@ current_generation = {
     'prompt_id': None,  # 当前提示词的ID
     'positive_prompt': None,  # 保存生成的正面提示词
     'negative_prompt': None,  # 保存生成的负面提示词
+    'image_path': None,  # 用户上传的图片路径
     'width': 800,  # Default width
     'height': 1200,  # Default height
     'total_count': 10,
@@ -110,7 +119,8 @@ def worker_thread():
                 positive_prompt,
                 negative_prompt,
                 width=current_generation['width'],
-                height=current_generation['height']
+                height=current_generation['height'],
+                image_path=current_generation['image_path']
             )
 
             # Save images
@@ -179,6 +189,36 @@ def test_emit():
     socketio.emit('test_message', {'message': 'Test from API'}, room='generation')
     return jsonify({'success': True})
 
+@app.route('/api/upload', methods=['POST'])
+def upload_file():
+    """处理文件上传"""
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'message': '没有文件被上传'})
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'success': False, 'message': '没有选择文件'})
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # 为避免文件名冲突，使用UUID前缀
+        unique_filename = f"{uuid.uuid4().hex}_{filename}"
+
+        # 确保upload目录存在
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        file.save(filepath)
+
+        return jsonify({
+            'success': True,
+            'filename': unique_filename,
+            'filepath': filepath
+        })
+    else:
+        return jsonify({'success': False, 'message': '不支持的文件类型'})
+
 @app.route('/api/start', methods=['POST'])
 def start_generation():
     """Start or continue image generation"""
@@ -187,6 +227,7 @@ def start_generation():
     count = data.get('count', 10)
     width = data.get('width', 800)  # Get width from request
     height = data.get('height', 1200)  # Get height from request
+    image_path = data.get('image_path')  # Get image path from request
 
     # Update or reset state
     if user_prompt and user_prompt != current_generation['current_prompt']:
@@ -194,6 +235,7 @@ def start_generation():
         current_generation['current_prompt'] = user_prompt
         current_generation['width'] = width  # Update width
         current_generation['height'] = height  # Update height
+        current_generation['image_path'] = image_path  # Update image path
         current_generation['total_count'] = count
         current_generation['generated_count'] = 0
         current_generation['images'] = []
@@ -233,6 +275,7 @@ def get_status():
         'current_prompt': current_generation['current_prompt'],
         'width': current_generation['width'],
         'height': current_generation['height'],
+        'image_path': current_generation['image_path'],
         'total_count': current_generation['total_count'],
         'generated_count': current_generation['generated_count'],
         'images': current_generation['images']

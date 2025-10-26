@@ -119,12 +119,12 @@
           {
             "name": "A",
             "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_qpqls_00149_.png&type=temp&subfolder=&rand=0.9242623380413715"
+            "url": "/api/view?filename=rgthree.compare._temp_qpqls_00151_.png&type=temp&subfolder=&rand=0.06575170078738368"
           },
           {
             "name": "B",
             "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_qpqls_00150_.png&type=temp&subfolder=&rand=0.1678737294996404"
+            "url": "/api/view?filename=rgthree.compare._temp_qpqls_00152_.png&type=temp&subfolder=&rand=0.7579454109248369"
           }
         ]
       },
@@ -269,6 +269,57 @@
       "title": "加载LoRA"
     }
   },
+  "96:0": {
+    "inputs": {
+      "image": "D:\\Backup\\Pictures\\512578_v9_bb.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "加载图像"
+    }
+  },
+  "96:1": {
+    "inputs": {
+      "preset": "FACEID PLUS V2",
+      "lora_strength": 0.5000000000000001,
+      "provider": "CPU",
+      "model": [
+        "105",
+        0
+      ]
+    },
+    "class_type": "IPAdapterUnifiedLoaderFaceID",
+    "_meta": {
+      "title": "IPAdapter Unified Loader FaceID"
+    }
+  },
+  "96:2": {
+    "inputs": {
+      "weight": 1,
+      "weight_faceidv2": 2,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "96:1",
+        0
+      ],
+      "ipadapter": [
+        "96:1",
+        1
+      ],
+      "image": [
+        "96:0",
+        0
+      ]
+    },
+    "class_type": "IPAdapterFaceID",
+    "_meta": {
+      "title": "IPAdapter FaceID"
+    }
+  },
   "84:0": {
     "inputs": {
       "model_name": "bbox/face_yolov8m.pt"
@@ -392,7 +443,7 @@
         0
       ],
       "model": [
-        "105",
+        "96:2",
         0
       ],
       "clip": [
@@ -540,7 +591,7 @@
         0
       ],
       "model": [
-        "105",
+        "96:2",
         0
       ],
       "clip": [

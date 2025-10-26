@@ -328,6 +328,84 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
+        /* 图片上传样式 */
+        .image-upload-section {
+            width: 100%;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-area {
+            width: 100%;
+            min-height: 120px;
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: rgba(99, 102, 241, 0.6);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .upload-area.dragover {
+            border-color: rgba(99, 102, 241, 0.8);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .upload-placeholder {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .image-preview {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(239, 68, 68, 0.9);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .remove-image:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: scale(1.1);
+        }
+
         /* 顶部栏 */
         .top-bar {
             position: fixed;
@@ -1157,6 +1235,31 @@
             </div>
         </div>
 
+        <!-- 图片上传区域 -->
+        <div class="image-upload-section">
+            <label style="color: rgba(255, 255, 255, 0.8); font-size: 14px; margin-bottom: 12px; font-weight: 500; display: block;">
+                上传参考图片（可选）
+            </label>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(99, 102, 241, 0.6)" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-top: 12px;">
+                        点击或拖拽上传图片<br>
+                        <span style="font-size: 12px;">支持人脸替换功能</span>
+                    </p>
+                </div>
+                <div class="image-preview" id="imagePreview" style="display: none;">
+                    <img id="previewImg" src="" alt="预览">
+                    <button class="remove-image" id="removeImage" title="删除图片">✕</button>
+                </div>
+            </div>
+        </div>
+
             <button id="submitBtn" class="submit-btn">开始创作 →</button>
 
             <!-- 历史记录按钮 -->
@@ -1293,6 +1396,14 @@
         const customHeight = document.getElementById('customHeight');
         const initialHistoryBtn = document.getElementById('initialHistoryBtn');
 
+        // 图片上传相关DOM元素
+        const uploadArea = document.getElementById('uploadArea');
+        const imageUpload = document.getElementById('imageUpload');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const removeImage = document.getElementById('removeImage');
+
         // 获取屏幕尺寸
         const screenWidth = window.screen.width;
         const screenHeight = window.screen.height;
@@ -1313,6 +1424,7 @@
         let isTopBarExpanded = false; // 顶部栏展开状态
         let currentPromptId = null; // 当前提示词ID
         let historyRecords = []; // 历史记录列表
+        let uploadedImagePath = null; // 上传的图片路径
 
         // 初始化显示屏幕尺寸
         function updateScreenSizeDisplay() {
@@ -1368,6 +1480,96 @@
                 selectedHeight = parseInt(customHeight.value) || 1200;
             }
         });
+
+        // 图片上传处理
+        uploadArea.addEventListener('click', () => {
+            imageUpload.click();
+        });
+
+        // 拖拽上传
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        // 文件选择
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file);
+            }
+        });
+
+        // 处理文件上传
+        async function handleFileUpload(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('请选择图片文件');
+                return;
+            }
+
+            // 显示预览
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                uploadPlaceholder.style.display = 'none';
+                imagePreview.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+
+            // 上传文件到服务器
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    uploadedImagePath = data.filepath;
+                    console.log('文件上传成功:', uploadedImagePath);
+                } else {
+                    alert('文件上传失败: ' + data.message);
+                    resetUpload();
+                }
+            } catch (error) {
+                console.error('上传失败:', error);
+                alert('文件上传失败，请重试');
+                resetUpload();
+            }
+        }
+
+        // 移除上传的图片
+        removeImage.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetUpload();
+        });
+
+        // 重置上传
+        function resetUpload() {
+            uploadedImagePath = null;
+            previewImg.src = '';
+            uploadPlaceholder.style.display = 'flex';
+            imagePreview.style.display = 'none';
+            imageUpload.value = '';
+        }
 
         // 刷新提示词按钮
         const refreshPromptBtn = document.getElementById('refreshPromptBtn');
@@ -1445,6 +1647,7 @@
                 galleryScroll.innerHTML = ''; // 清空缩略图
                 logContent.textContent = ''; // 清空日志
                 logContainer.classList.remove('show'); // 隐藏日志区域
+                // 新提示词时不清空上传的图片，让用户可以重复使用
             }
 
             // 动画隐藏初始输入界面
@@ -1465,16 +1668,24 @@
                 waitingState.style.display = 'block';
             }
 
-            // 开始生成（无限模式，不设置count），包含尺寸参数
+            // 开始生成（无限模式，不设置count），包含尺寸和图片参数
+            const requestBody = {
+                prompt,
+                count: 999999,
+                width: selectedWidth,
+                height: selectedHeight
+            };
+
+            // 如果有上传的图片，添加图片路径
+            if (uploadedImagePath) {
+                requestBody.image_path = uploadedImagePath;
+                console.log('包含上传图片:', uploadedImagePath);
+            }
+
             const response = await fetch('/api/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    prompt,
-                    count: 999999,
-                    width: selectedWidth,
-                    height: selectedHeight
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (response.ok) {
@@ -1758,15 +1969,22 @@
         continueBtn.addEventListener('click', async () => {
             if (!currentPrompt) return;
 
+            const requestBody = {
+                prompt: currentPrompt,
+                count: 999999,
+                width: selectedWidth,
+                height: selectedHeight
+            };
+
+            // 如果有上传的图片，添加图片路径
+            if (uploadedImagePath) {
+                requestBody.image_path = uploadedImagePath;
+            }
+
             const response = await fetch('/api/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    prompt: currentPrompt,
-                    count: 999999,
-                    width: selectedWidth,
-                    height: selectedHeight
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (response.ok) {
@@ -2083,6 +2301,104 @@
             console.error('错误:', data);
             alert('错误: ' + data.message);
         });
+
+        // ========== PC 键盘支持 ==========
+        // 键盘事件处理（支持上下左右键）
+        document.addEventListener('keydown', (e) => {
+            // 如果在输入框中，不处理键盘事件
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+
+            // 如果初始输入界面或历史面板可见，不处理图片切换
+            if (!initialInput.classList.contains('hidden') || historyPanel.classList.contains('show')) {
+                return;
+            }
+
+            // 如果没有图片，不处理
+            if (images.length === 0) {
+                return;
+            }
+
+            switch(e.key) {
+                case 'ArrowUp':      // 上键 - 上一张
+                case 'ArrowLeft':    // 左键 - 上一张
+                    e.preventDefault();
+                    if (currentIndex > 0) {
+                        showImage(currentIndex - 1, 'down');
+                        console.log('⬆️ 键盘：上一张', currentIndex + 1, '/', images.length);
+                    } else {
+                        // 已经是第一张
+                        showToast('已经是第一张了');
+                    }
+                    break;
+
+                case 'ArrowDown':    // 下键 - 下一张
+                case 'ArrowRight':   // 右键 - 下一张
+                    e.preventDefault();
+                    if (currentIndex < images.length - 1) {
+                        showImage(currentIndex + 1, 'up');
+                        console.log('⬇️ 键盘：下一张', currentIndex + 1, '/', images.length);
+                    } else {
+                        // 已经是最后一张
+                        if (isGenerating) {
+                            showToast('正在生成更多图片...');
+                        } else {
+                            showToast('已经是最后一张了');
+                        }
+                    }
+                    break;
+
+                case 'Home':         // Home键 - 第一张
+                    e.preventDefault();
+                    if (currentIndex !== 0) {
+                        showImage(0, 'down');
+                        console.log('🏠 键盘：跳转到第一张');
+                    }
+                    break;
+
+                case 'End':          // End键 - 最后一张
+                    e.preventDefault();
+                    if (currentIndex !== images.length - 1) {
+                        showImage(images.length - 1, 'up');
+                        console.log('🔚 键盘：跳转到最后一张');
+                    }
+                    break;
+
+                case 'Delete':       // Delete键 - 删除当前图片
+                    e.preventDefault();
+                    if (images.length > 0 && deleteBtn.style.display !== 'none') {
+                        deleteBtn.click();
+                    }
+                    break;
+
+                case ' ':            // 空格键 - 切换底部图片列表
+                    e.preventDefault();
+                    galleryToggle.click();
+                    break;
+
+                case 'Escape':       // ESC键 - 关闭历史面板或底部列表
+                    e.preventDefault();
+                    if (historyPanel.classList.contains('show')) {
+                        historyPanel.classList.remove('show');
+                    } else if (imageGallery.classList.contains('open')) {
+                        galleryToggle.click();
+                    }
+                    break;
+            }
+        });
+
+        // 显示提示消息
+        function showToast(message) {
+            // 复用 noMoreHint 元素来显示提示
+            noMoreHint.textContent = message;
+            noMoreHint.classList.add('show');
+            setTimeout(() => {
+                noMoreHint.classList.remove('show');
+            }, 1500);
+        }
+
+        console.log('✅ PC 键盘支持已启用：上下左右键切换图片，Home/End跳转，Delete删除，空格切换列表，ESC关闭面板');
     </script>
 </body>
 </html>

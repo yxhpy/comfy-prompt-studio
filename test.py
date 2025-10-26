@@ -98,7 +98,7 @@ def get_history(prompt_id, server_address="127.0.0.1:8188"):
     return response.json()
 
 
-def generate_image_with_comfyui(positive_prompt, negative_prompt, width=800, height=1200, workflow_path="flowv1.json", server_address="127.0.0.1:8188"):
+def generate_image_with_comfyui(positive_prompt, negative_prompt, width=800, height=1200, workflow_path=None, image_path=None, server_address="127.0.0.1:8188"):
     """
     Generate image using ComfyUI workflow
 
@@ -107,17 +107,43 @@ def generate_image_with_comfyui(positive_prompt, negative_prompt, width=800, hei
         negative_prompt: Negative prompt text
         width: Image width (default 800)
         height: Image height (default 1200)
-        workflow_path: Path to workflow JSON file
+        workflow_path: Path to workflow JSON file (auto-select if None)
+        image_path: Path to input image for face workflow (optional)
         server_address: ComfyUI server address
 
     Returns:
         Generated image data
     """
     import random
+    import os
+
+    # Auto-select workflow based on image_path
+    if workflow_path is None:
+        if image_path:
+            # 优先使用新位置，向后兼容旧位置
+            if os.path.exists("config/workflows/flow_face.json"):
+                workflow_path = "config/workflows/flow_face.json"
+            else:
+                workflow_path = "flowjson/flow_face.json"
+            print(f"🖼️ 使用人脸替换工作流: {workflow_path}", flush=True)
+        else:
+            # 优先使用新位置，向后兼容旧位置
+            if os.path.exists("config/workflows/flowv_normal.json"):
+                workflow_path = "config/workflows/flowv_normal.json"
+            else:
+                workflow_path = "flowjson/flowv_normal.json"
+            print(f"📝 使用普通文生图工作流: {workflow_path}", flush=True)
 
     # Load workflow
     with open(workflow_path, 'r', encoding='utf-8') as f:
         workflow = json.load(f)
+
+    # Replace image path in face workflow if needed
+    if image_path and "96:0" in workflow:
+        # Convert to absolute path for ComfyUI
+        abs_image_path = os.path.abspath(image_path)
+        workflow["96:0"]["inputs"]["image"] = abs_image_path
+        print(f"📸 输入图片路径: {abs_image_path}", flush=True)
 
     # Update prompts in workflow
     if "3" in workflow:
@@ -141,6 +167,12 @@ def generate_image_with_comfyui(positive_prompt, negative_prompt, width=800, hei
         new_seed_11 = random.randint(0, 999999999999999)
         workflow["11"]["inputs"]["seed"] = new_seed_11
         print(f"🎲 随机种子(节点11): {new_seed_11}", flush=True)
+
+    # Also handle seed nodes in face workflow
+    if "120" in workflow and "inputs" in workflow["120"] and "seed" in workflow["120"]["inputs"]:
+        new_seed_120 = random.randint(0, 999999999999999)
+        workflow["120"]["inputs"]["seed"] = new_seed_120
+        print(f"🎲 随机种子(节点120): {new_seed_120}", flush=True)
 
     # Queue the prompt
     response = queue_prompt(workflow, server_address)

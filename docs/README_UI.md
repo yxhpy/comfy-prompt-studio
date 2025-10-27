@@ -26,7 +26,7 @@ pip install -r requirements.txt
 ## 启动服务
 
 ```bash
-python app.py
+python -m src.cli.run
 ```
 
 服务将在 `http://0.0.0.0:5000` 启动
@@ -58,7 +58,8 @@ python app.py
 ## 技术架构
 
 ### 后端 (Flask + SocketIO)
-- **app.py**: Flask 服务器，提供 API 和 WebSocket
+- **src/app/__init__.py**: Flask 应用工厂
+- **src/cli/run.py**: 应用启动入口
 - **端点**:
   - `POST /api/start`: 开始生成
   - `POST /api/stop`: 停止生成
@@ -82,15 +83,21 @@ python app.py
 
 ```
 comfyui/
-├── app.py                 # Flask 服务器
-├── test.py               # ComfyUI API 调用
-├── generator_prompt.py   # 提示词生成
-├── flow.json            # ComfyUI 工作流
-├── requirements.txt     # Python 依赖
+├── src/
+│   ├── app/              # Flask 应用
+│   ├── cli/
+│   │   └── run.py        # 启动入口
+│   └── core/
+│       ├── comfyui/      # ComfyUI 集成
+│       └── prompt/       # 提示词生成
+├── config/
+│   └── workflows/        # ComfyUI 工作流
 ├── templates/
-│   └── index.html       # 前端界面
-└── static/
-    └── generated/       # 生成的图片
+│   └── index.html        # 前端界面
+├── static/
+│   └── generated/        # 生成的图片
+└── data/
+    └── generated/        # 新的图片存储位置
 ```
 
 ## 注意事项

@@ -51,6 +51,9 @@ data/history.db
 *.sqlite
 *.sqlite3
 
+# Legacy data files
+data/legacy/*.json
+
 # Temporary files
 *.tmp
 *.bak

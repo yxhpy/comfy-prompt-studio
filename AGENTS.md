@@ -1,135 +1,185 @@
-# AGENTS.md
-- 本文件为 AGENTS 记忆文件，只记录最新的项目状态，保持文件内容的准确性，避免历史记录的干扰
-- 使用中文
-- 项目必须工程化，方便维护，永远保持文件位置正确
-- 永远保证 AGENTS.md 的内容是准确的
-- 使用设计模式，保持代码结构清晰，方便维护
-- 修复 bug 请先 debug 确认问题所在，再进行修复
-- 新增功能先验证功能是否正常，再进行新增
-- windows 下必须使用 utf-8 编码，避免中文乱码问题
+# AGENTS.md - AI 代理配置文档
+
+本文档说明项目中使用的 AI 代理配置和提示词生成服务。
+
+## AI 提供商
+
+项目支持两种 AI 提供商，通过环境变量 `AI_PROVIDER` 配置：
+
+### 1. Ollama (默认)
+
+**配置参数:**
+```env
+AI_PROVIDER=ollama
+OLLAMA_MODEL=huihui_ai/qwen3-abliterated:30b
+OLLAMA_URL=http://localhost:11434
+```
+
+**特点:**
+- 本地部署，数据隐私性强
+- 需要本地运行 Ollama 服务
+- 支持多种开源模型
+- 默认端口：11434
+
+**使用场景:**
+- 对数据隐私有要求的场景
+- 需要离线工作的环境
+- 自定义模型训练
+
+### 2. Gemini
+
+**配置参数:**
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your-api-key-here
+GEMINI_MODEL=gemini-2.0-flash-exp
+GEMINI_BASE_URL=https://api.laozhang.ai/v1/
+```
+
+**特点:**
+- 云端 API 服务
+- 响应速度快
+- 需要 API 密钥
+- 支持流式响应
+
+**使用场景:**
+- 需要快速响应的场景
+- 不便部署本地模型的环境
+- 对最新模型能力有要求
+
+## 提示词生成服务
+
+### 核心模块
+
+**位置:** `src/core/prompt/generator.py`
+
+**主要功能:**
+- 增强用户输入的简单提示词
+- 生成详细的 Stable Diffusion 风格提示词
+- 支持中英文输入
+- 自动添加画质关键词
+
+### 提示词生成流程
+
+```
+用户输入 → AI 代理 → 提示词增强 → 返回优化后的提示词
+```
+
+### 提示词模板
+
+系统使用固定的提示词模板来指导 AI 生成高质量的图像描述：
+
 ```python
-if sys.platform == 'win32':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-```
-- 根目录 AGENTS.md CLAUDE.md 禁止删除
+PROMPT_TEMPLATE = """
+你是一个专业的 Stable Diffusion 提示词专家。
+用户会给你一个简单的描述，请帮助扩展成详细的 Stable Diffusion 提示词。
 
-AI 图像生成 Web 应用：Ollama 提示词增强 + ComfyUI 工作流 + Flask WebSocket 实时更新
+要求：
+1. 保持用户原意，不要改变主题
+2. 添加详细的画面细节、氛围、光影描述
+3. 添加适当的画质关键词（如 masterpiece, best quality, ultra detailed 等）
+4. 使用英文逗号分隔的关键词格式
+5. 直接输出提示词，不要有其他说明文字
 
-## 架构设计
-
-**数据流：** 用户输入 → Ollama（提示词增强）→ ComfyUI（图像生成）→ WebSocket → 前端展示
-
-**核心模块：**
-- `app.py` - Flask 主应用（向后兼容）
-- `run.py` - 新的应用启动入口
-- `src/services/prompt_service.py` - Ollama/Gemini 提示词服务（单例模式）
-- `test.py` - ComfyUI API 集成，自动选择工作流
-- `history_manager.py` - SQLite 历史记录管理服务
-
-**工作流系统：**
-- `config/workflows/flowv_normal.json` - 普通文生图工作流
-- `config/workflows/flow_face.json` - 人脸替换工作流
-- 自动选择逻辑：有 `image_path` 参数时使用人脸工作流
-
-## 快速启动
-
-**前置要求：** ComfyUI (127.0.0.1:8188) + Ollama (localhost:11434)
-
-```bash
-# 方式1：使用新的启动脚本（推荐）
-python run.py
-
-# 方式2：兼容旧方式
-python app.py
+用户输入：{user_prompt}
+"""
 ```
 
-访问: http://localhost:5000
+### 使用示例
 
-## 目录结构（工程化）
-
+**输入:**
 ```
-comfyui/
-├── run.py                      # 新：应用启动入口
-├── app.py                      # 旧：Flask 主应用（向后兼容）
-├── src/                        # 源代码目录
-│   ├── services/              # 业务逻辑层
-│   │   └── prompt_service.py # 提示词生成服务（单例）
-│   ├── routes/                # 路由模块（待迁移）
-│   ├── workers/               # 后台任务（待迁移）
-│   ├── models/                # 数据模型（待迁移）
-│   └── utils/                 # 工具函数
-├── config/                     # 配置文件
-│   ├── workflows/             # ComfyUI 工作流
-│   │   ├── flowv_normal.json # 普通文生图
-│   │   └── flow_face.json    # 人脸替换
-│   └── settings.py           # 应用配置类
-├── templates/                  # 前端模板
-│   └── index.html
-├── static/                     # 静态资源（旧）
-│   └── generated/             # 向后兼容
-├── data/                       # 数据目录（新）
-│   ├── generated/             # 生成的图片
-│   ├── upload/                # 上传的图片
-│   └── history.db             # SQLite 历史记录数据库
-├── tests/                      # 测试文件
-│   ├── test_api.py
-│   ├── test_worker.py
-│   └── debug_test.py
-├── history_manager.py          # 历史记录管理（旧位置，兼容）
-├── test.py                     # ComfyUI 集成（旧位置，兼容）
-├── generator_prompt.py         # 提示词生成（旧位置，兼容）
-├── requirements.txt
-├── .env
-└── CLAUDE.md
+一个女孩在花园里
 ```
 
-**注意：** 当前处于渐进式重构阶段，部分模块保留在根目录以保持向后兼容。
+**输出:**
+```
+masterpiece, best quality, ultra detailed, 8k wallpaper,
+a beautiful girl standing in a lush garden,
+surrounded by colorful flowers, soft sunlight filtering through trees,
+peaceful atmosphere, detailed facial features, elegant pose,
+vibrant colors, professional photography, shallow depth of field
+```
 
-## API 接口
+## 单例模式实现
 
-- `POST /api/start` - 开始生成 (参数: `prompt`, `count`, `width`, `height`, `image_path`)
-- `POST /api/stop` - 停止生成
-- `GET /api/status` - 当前状态
-- `POST /api/add_more` - 添加图片到队列 (参数: `count`)
-- `GET /api/history` - 获取所有历史记录
-- `POST /api/switch_prompt` - 加载历史记录 (参数: `prompt_id`)
-- `DELETE /api/history/<prompt_id>` - 删除历史记录
-- `POST /api/upload` - 上传参考图片
-- `POST /api/delete_image` - 删除已生成图片 (参数: `filename`)
+提示词服务使用单例模式，确保在应用生命周期内只初始化一次：
 
-## WebSocket 事件
+**位置:** `src/services/prompt_service.py`
 
-**服务端 → 客户端：**
-- `new_image` - 新图片生成 (数据: filename, current, total)
-- `progress` - 进度更新 (数据: current, total, status)
-- `log` - 生成过程实时日志消息
-- `generation_complete` - 所有图片完成 (数据: total)
-- `error` - 发生错误 (数据: message)
+**优势:**
+- 避免重复初始化 AI 客户端
+- 减少资源消耗
+- 全局共享配置
 
-## 关键技术要点
+**使用方法:**
+```python
+from src.services.prompt_service import PromptService
 
-1. **工程化架构**: 采用分层设计，逐步从单文件重构为模块化结构
-2. **向后兼容**: 保留旧代码路径，确保现有功能正常运行
-3. **设计模式**: PromptService 使用单例模式，避免重复初始化
-4. **配置管理**: config/settings.py 统一管理配置，支持开发/生产环境
-5. **SocketIO 兼容性**: 不要使用 `broadcast=True` 参数（当前版本不支持）
-6. **线程安全**: `current_generation` 字典被路由和工作线程同时访问
-7. **图片存储结构**: `static/generated/[prompt_id]/[uuid].png`（旧）或 `data/generated/`（新）
-8. **历史记录**: SQLite 数据库 (`data/history.db`)，两张表：`prompts`（提示词记录）和 `images`（图片记录）
-9. **工作流节点**: 节点 "45"/"46" 用于正面/负面提示词，节点 "6" 用于图片尺寸
-10. **随机种子**: 节点 "5"、"11"（普通工作流）和 "120"（人脸工作流）自动随机化
-11. **人脸工作流**: 节点 "96:0" 的 `inputs.image` 字段需要设置为上传图片的绝对路径
+service = PromptService.get_instance()
+enhanced_prompt = service.generate_prompt("用户输入")
+```
 
-## 开发计划
+## 服务健康检查
 
-**已完成：**
-- ✅ 创建工程化目录结构
-- ✅ 配置管理模块 (config/settings.py)
-- ✅ 提示词服务重构 (src/services/prompt_service.py)
-- ✅ 新的启动脚本 (run.py)
+在应用启动时，系统会自动检查 AI 服务的可用性：
 
-**待完成：**
-- ⏳ 路由模块拆分 (src/routes/)
-- ⏳ 工作线程模块 (src/workers/)
-- ⏳ 历史记录模型 (src/models/)
-- ⏳ ComfyUI 服务层 (src/services/comfyui_service.py)
+**Ollama 检查:**
+```python
+response = requests.get(f"{OLLAMA_URL}/api/tags")
+if response.status_code == 200:
+    print("✅ Ollama 服务正常")
+```
+
+**Gemini 检查:**
+```python
+client = OpenAI(api_key=GEMINI_API_KEY, base_url=GEMINI_BASE_URL)
+# 测试连接
+```
+
+## 错误处理
+
+### 常见错误
+
+1. **连接失败**
+   - 检查服务是否启动（Ollama）
+   - 检查 API 密钥是否正确（Gemini）
+   - 检查网络连接
+
+2. **模型未找到**
+   - 确认模型名称拼写正确
+   - Ollama：使用 `ollama list` 查看可用模型
+   - Gemini：查看 API 文档确认模型名称
+
+3. **超时错误**
+   - 增加超时时间配置
+   - 检查网络延迟
+   - 考虑切换到本地部署
+
+## 配置最佳实践
+
+1. **开发环境**: 使用 Ollama 本地部署
+2. **生产环境**: 根据负载选择 Ollama 或 Gemini
+3. **API 密钥管理**:
+   - 使用 `.env` 文件存储密钥
+   - 不要将密钥提交到版本控制
+   - 定期轮换 API 密钥
+4. **性能优化**:
+   - 使用单例模式避免重复初始化
+   - 考虑添加提示词缓存机制
+   - 监控 API 调用频率和成本
+
+## 扩展性
+
+项目设计支持扩展更多 AI 提供商：
+
+1. 在 `src/core/prompt/generator.py` 添加新的生成函数
+2. 在 `config/settings.py` 添加新的配置参数
+3. 在 `src/services/prompt_service.py` 添加初始化逻辑
+4. 更新本文档说明新提供商的使用方法
+
+## 参考资料
+
+- [Ollama 官方文档](https://ollama.ai/)
+- [Gemini API 文档](https://ai.google.dev/)
+- [Stable Diffusion 提示词指南](https://stable-diffusion-art.com/prompt-guide/)

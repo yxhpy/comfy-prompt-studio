@@ -2,7 +2,7 @@
 - 本文件为 CLAUDE 记忆文件，只记录最新的项目状态，保持文件内容的准确性，避免历史记录的干扰
 - 使用中文
 - 项目必须工程化，方便维护，永远保持文件位置正确
-- 永远保证 CLAUDE.md 的内容是准确的
+- 永远保证 CLAUDE.md, README.md, AGENTS.md 的内容是准确的,文档和代码一致
 - 使用设计模式，保持代码结构清晰，方便维护
 - 修复 bug 请先 debug 确认问题所在，再进行修复
 - 新增功能先验证功能是否正常，再进行新增
@@ -11,7 +11,8 @@
 if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 ```
-- 根目录 AGENTS.md CLAUDE.md 禁止删除
+- 根目录 CLAUDE.md, README.md, AGENTS.md 禁止删除
+
 
 AI 图像生成 Web 应用：Ollama 提示词增强 + ComfyUI 工作流 + Flask WebSocket 实时更新
 
@@ -20,11 +21,12 @@ AI 图像生成 Web 应用：Ollama 提示词增强 + ComfyUI 工作流 + Flask 
 **数据流：** 用户输入 → Ollama（提示词增强）→ ComfyUI（图像生成）→ WebSocket → 前端展示
 
 **核心模块：**
-- `app.py` - Flask 主应用（向后兼容）
-- `run.py` - 新的应用启动入口
-- `src/services/prompt_service.py` - Ollama/Gemini 提示词服务（单例模式）
-- `test.py` - ComfyUI API 集成，自动选择工作流
-- `history_manager.py` - SQLite 历史记录管理服务
+- `src/cli/run.py` - 应用启动入口
+- `src/cli/serve.py` - Flask 服务器
+- `src/app/__init__.py` - Flask 应用工厂
+- `src/core/prompt/` - 提示词生成服务（Ollama/Gemini）
+- `src/core/comfyui/` - ComfyUI API 集成，自动选择工作流
+- `src/core/history/` - SQLite 历史记录管理服务
 
 **工作流系统：**
 - `config/workflows/flowv_normal.json` - 普通文生图工作流
@@ -51,11 +53,7 @@ pip install -r requirements.txt
 **启动应用：**
 
 ```bash
-# 方式1：使用新的启动脚本（推荐）
-python run.py
-
-# 方式2：兼容旧方式
-python app.py
+python -m src.cli.run
 ```
 
 访问: http://localhost:5000
@@ -64,53 +62,81 @@ python app.py
 
 ```
 comfyui/
-├── run.py                      # 新：应用启动入口
-├── app.py                      # 旧：Flask 主应用（向后兼容）
 ├── src/                        # 源代码目录
-│   ├── services/              # 业务逻辑层
-│   │   └── prompt_service.py # 提示词生成服务（单例）
-│   ├── routes/                # 路由模块（待迁移）
-│   ├── workers/               # 后台任务（待迁移）
-│   ├── models/                # 数据模型（待迁移）
-│   └── utils/                 # 工具函数
+│   ├── app/                    # Flask 应用模块
+│   │   ├── __init__.py        # 应用工厂
+│   │   ├── config.py          # 应用配置
+│   │   ├── extensions.py      # Flask 扩展
+│   │   ├── routes/            # 路由蓝图
+│   │   ├── services/          # 业务服务
+│   │   └── events/            # WebSocket 事件
+│   ├── cli/                    # 命令行工具
+│   │   ├── run.py             # 应用启动入口
+│   │   ├── serve.py           # Flask 服务器
+│   │   ├── check_import.py    # 导入验证工具
+│   │   └── migrate_to_sqlite.py  # 数据迁移工具
+│   ├── core/                   # 核心业务逻辑
+│   │   ├── comfyui/           # ComfyUI 集成
+│   │   ├── history/           # 历史记录管理
+│   │   └── prompt/            # 提示词生成
+│   ├── legacy/                 # 向后兼容代码
+│   ├── models/                 # 数据模型
+│   ├── routes/                 # 路由模块（待迁移）
+│   ├── services/               # 业务服务（待迁移）
+│   ├── utils/                  # 工具函数
+│   └── workers/                # 后台任务
 ├── config/                     # 配置文件
 │   ├── workflows/             # ComfyUI 工作流
 │   │   ├── flowv_normal.json # 普通文生图
 │   │   └── flow_face.json    # 人脸替换
-│   └── settings.py           # 应用配置类
-├── templates/                  # 前端模板
-│   └── index.html
-├── static/                     # 静态资源（旧）
-│   └── generated/             # 向后兼容
-├── data/                       # 数据目录（新）
-│   ├── generated/             # 生成的图片
-│   ├── upload/                # 上传的图片
-│   └── history.db             # SQLite 历史记录数据库
+│   └── settings.py           # 全局配置类
+├── templates/                  # Jinja2 模板
+│   ├── layouts/               # 布局模板
+│   └── partials/              # 组件模板
+├── static/                     # 静态资源
+│   ├── css/                   # 样式文件
+│   ├── js/                    # JavaScript 文件
+│   └── generated/             # 生成图片（旧，向后兼容）
+├── data/                       # 数据目录
+│   ├── generated/             # 生成的图片（不提交）
+│   ├── upload/                # 上传的图片（不提交）
+│   └── history.db             # SQLite 历史记录（不提交）
 ├── tests/                      # 测试文件
-│   ├── test_api.py
-│   ├── test_worker.py
-│   └── debug_test.py
-├── history_manager.py          # 历史记录管理（旧位置，兼容）
-├── test.py                     # ComfyUI 集成（旧位置，兼容）
-├── generator_prompt.py         # 提示词生成（旧位置，兼容）
+├── .env                        # 环境变量（不提交）
+├── .env.example               # 环境变量模板
 ├── requirements.txt
-├── .env
-└── CLAUDE.md
+├── CLAUDE.md                   # 项目技术文档
+├── README.md                   # 快速开始指南
+└── AGENTS.md                   # AI 代理配置
 ```
 
-**注意：** 当前处于渐进式重构阶段，部分模块保留在根目录以保持向后兼容。
+**注意：**
+- 当前处于渐进式重构阶段，部分模块保留以保持向后兼容
+- 带有"（不提交）"标记的文件已在 `.gitignore` 中忽略
 
 ## API 接口
 
+**图像生成:**
 - `POST /api/start` - 开始生成 (参数: `prompt`, `count`, `width`, `height`, `image_path`)
 - `POST /api/stop` - 停止生成
 - `GET /api/status` - 当前状态
 - `POST /api/add_more` - 添加图片到队列 (参数: `count`)
+- `POST /api/delete_image` - 删除已生成图片 (参数: `filename`)
+
+**文件上传:**
+- `POST /api/upload` - 上传参考图片
+
+**历史记录:**
 - `GET /api/history` - 获取所有历史记录
+- `GET /api/history/<prompt_id>` - 获取单个历史记录
 - `POST /api/switch_prompt` - 加载历史记录 (参数: `prompt_id`)
 - `DELETE /api/history/<prompt_id>` - 删除历史记录
-- `POST /api/upload` - 上传参考图片
-- `POST /api/delete_image` - 删除已生成图片 (参数: `filename`)
+
+**提示词:**
+- `GET /api/prompts` - 获取预设提示词（随机返回一个）
+
+**开发调试:**
+- `POST /api/test_emit` - 测试 WebSocket 消息发送
 
 ## WebSocket 事件
 
@@ -163,7 +189,7 @@ comfyui/
 - ✅ 创建工程化目录结构
 - ✅ 配置管理模块 (config/settings.py)
 - ✅ 提示词服务重构 (src/services/prompt_service.py)
-- ✅ 新的启动脚本 (run.py)
+- ✅ 应用启动脚本 (src/cli/run.py)
 
 **待完成：**
 - ⏳ 路由模块拆分 (src/routes/)

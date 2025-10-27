@@ -37,7 +37,7 @@ GEMINI_BASE_URL=https://your-api-endpoint.com/v1/
 ### 验证安装
 
 ```bash
-python check_import.py
+python -m src.cli.check_import
 ```
 
 预期输出：
@@ -53,11 +53,7 @@ python check_import.py
 ### 启动应用
 
 ```bash
-# 推荐：使用新的启动脚本
-python run.py
-
-# 或者使用传统方式（向后兼容）
-python app.py
+python -m src.cli.run
 ```
 
 访问: http://localhost:5000
@@ -83,26 +79,54 @@ python app.py
 
 ```
 comfyui/
-├── run.py                    # 应用启动入口（推荐）
 ├── src/                      # 源代码（模块化）
-│   ├── services/            # 业务逻辑层
-│   ├── routes/              # 路由模块
-│   ├── workers/             # 后台任务
-│   ├── models/              # 数据模型
-│   └── utils/               # 工具函数
+│   ├── app/                  # Flask 应用模块
+│   │   ├── __init__.py      # 应用工厂
+│   │   ├── config.py        # 应用配置
+│   │   ├── extensions.py    # Flask 扩展
+│   │   ├── routes/          # 路由蓝图
+│   │   ├── services/        # 业务服务
+│   │   └── events/          # WebSocket 事件
+│   ├── cli/                  # 命令行工具
+│   │   ├── run.py           # 应用启动入口
+│   │   ├── serve.py         # Flask 服务器
+│   │   ├── check_import.py  # 导入验证工具
+│   │   └── migrate_to_sqlite.py  # 数据迁移工具
+│   ├── core/                 # 核心业务逻辑
+│   │   ├── comfyui/         # ComfyUI 集成
+│   │   ├── history/         # 历史记录管理
+│   │   └── prompt/          # 提示词生成
+│   ├── legacy/               # 向后兼容代码
+│   ├── models/               # 数据模型
+│   ├── routes/               # 路由模块（待迁移）
+│   ├── services/             # 业务服务（待迁移）
+│   ├── utils/                # 工具函数
+│   └── workers/              # 后台任务
 ├── config/                   # 配置管理
 │   ├── workflows/           # ComfyUI 工作流
-│   └── settings.py          # 配置类
+│   │   ├── flowv_normal.json  # 普通文生图
+│   │   └── flow_face.json     # 人脸替换
+│   └── settings.py          # 全局配置类
+├── templates/                # Jinja2 模板
+│   ├── layouts/             # 布局模板
+│   └── partials/            # 组件模板
+├── static/                   # 静态资源
+│   ├── css/                 # 样式文件
+│   ├── js/                  # JavaScript 文件
+│   └── generated/           # 生成图片（旧，向后兼容）
 ├── data/                     # 数据存储
 │   ├── generated/           # 生成的图片（不提交）
 │   ├── upload/              # 上传的图片（不提交）
 │   └── history.db           # SQLite 历史记录（不提交）
 ├── tests/                    # 测试文件
 ├── .env                      # 环境变量（不提交，包含敏感信息）
-└── .env.example             # 环境变量模板（可提交）
+├── .env.example             # 环境变量模板（可提交）
+└── requirements.txt         # Python 依赖
 ```
 
-**注意**: 带有"（不提交）"标记的文件/目录已在 `.gitignore` 中忽略
+**注意**:
+- 带有"（不提交）"标记的文件/目录已在 `.gitignore` 中忽略
+- 当前处于渐进式重构阶段，部分模块保留以保持向后兼容
 
 ## 开发状态
 

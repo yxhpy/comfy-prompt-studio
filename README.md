@@ -101,6 +101,19 @@ python -m src.cli.run
 
 访问: http://localhost:5000
 
+## HTTPS 部署说明
+本项目默认以 HTTP 方式运行，适合本地开发环境。如果需要将应用对外暴露，建议使用 HTTPS 以避免数据明文传输。
+对于小规模或原型部署，可以使用 ngrok 作为反向代理快速提供 HTTPS 支持，而无需修改应用代码：
+```bash
+sudo snap install ngrok
+ngrok config add-authtoken TOKEN
+python -m src.cli.run &> log.out &
+ngrok http 5000
+```
+对于需要更稳定或长期部署的场景，也可以使用 Nginx 等 Web 服务器作为反向代理，并结合 TLS 证书（如 Let’s Encrypt）提供 HTTPS 支持。
+
+生产环境仍建议使用标准的 Web 服务器和 TLS 配置方案。
+
 ## 项目特性
 
 - ✅ AI 智能提示词增强（支持 Ollama/Gemini）

@@ -1,3 +1,5 @@
+
+
 <div align="center">
 
 # ComfyUI Prompt Studio
@@ -75,6 +77,9 @@ AI_PROVIDER=gemini
 GEMINI_API_KEY=your-api-key-here
 GEMINI_MODEL=your-model-name
 GEMINI_BASE_URL=https://your-api-endpoint.com/v1/
+
+# ComfyUI 服务地址
+COMFYUI_SERVER=127.0.0.1:8188
 ```
 
 ### 验证安装
